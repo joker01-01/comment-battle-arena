@@ -5,7 +5,7 @@ import type { PixelAnimationName } from '../rendering/PixelCharacterRenderer';
 import { Vector2 } from '../core/vector';
 import { characterTemplates } from '../data/characterTemplates';
 import { generateAnimationSheetDataUrl } from '../utils/animationSheetExporter';
-import { imageToMatrix } from '../utils/imageToMatrix';
+import { processImageToMatrix } from '../utils/imageToMatrix';
 
 export class PixelSpritePreviewer {
   private overlay!: HTMLDivElement;
@@ -79,15 +79,45 @@ export class PixelSpritePreviewer {
             </div>
             
             <div class="import-section">
-              <h4>Import Image to Matrix</h4>
+              <h4>Import Image to Matrix v2</h4>
               <div class="import-controls">
                 <input type="file" id="previewer-import-file" accept="image/png, image/jpeg, image/webp">
-                <label title="Pixels with alpha below this will be transparent">
-                  Alpha Thresh: <input type="number" id="previewer-import-alpha" value="128" min="0" max="255" style="width: 50px;">
-                </label>
-                <label title="Smooth resize before quantization (good for photos)">
-                  <input type="checkbox" id="previewer-import-smooth"> Smooth
-                </label>
+                
+                <div class="import-preview-area" style="display: none;">
+                  <div style="position: relative; display: inline-block;">
+                    <canvas id="import-preview-canvas" style="max-width: 200px; max-height: 200px; border: 1px solid #444;"></canvas>
+                    <div id="import-crop-box" style="position: absolute; border: 2px dashed #4aa3ff; pointer-events: none; box-sizing: border-box;"></div>
+                  </div>
+                  
+                  <div class="crop-controls">
+                    <label>Crop X: <input type="number" id="import-crop-x" value="0" style="width: 50px;"></label>
+                    <label>Crop Y: <input type="number" id="import-crop-y" value="0" style="width: 50px;"></label>
+                    <label>Size: <input type="number" id="import-crop-size" value="100" style="width: 50px;"></label>
+                    <button id="import-center-crop">Center Crop</button>
+                  </div>
+
+                  <div class="bg-removal-controls" style="margin-top: 5px;">
+                    <label><input type="checkbox" id="import-remove-bg"> Remove Background</label>
+                    <label>Color: <input type="color" id="import-bg-color" value="#ffffff"></label>
+                    <label>Tolerance: <input type="number" id="import-bg-tol" value="40" min="0" max="255" style="width: 50px;"></label>
+                    <button id="import-pick-bg">Pick Top-Left</button>
+                  </div>
+
+                  <div class="palette-controls" style="margin-top: 5px;">
+                    <label>Colors: <input type="number" id="import-color-count" value="7" min="2" max="7" style="width: 40px;"></label>
+                    <label><input type="checkbox" id="import-smooth"> Smooth</label>
+                    <label title="TODO: Not implemented yet"><input type="checkbox" id="import-dither" disabled> Dither</label>
+                  </div>
+
+                  <div class="import-actions" style="margin-top: 10px;">
+                    <button id="import-preview-btn">Preview Result</button>
+                    <button id="import-apply-btn" style="background: #4aa3ff;">Apply to Matrix</button>
+                  </div>
+                  
+                  <p style="font-size: 11px; color: #aaa; margin-top: 5px;">
+                    Tip: Image import is for draft generation only. Crop tightly, remove background, then manually clean the 16x16 matrix.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -265,21 +295,129 @@ export class PixelSpritePreviewer {
       this.exportAnimationSheet();
     });
 
-    this.overlay.querySelector('#previewer-import-file')!.addEventListener('change', async (e) => {
-      const fileInput = e.target as HTMLInputElement;
-      if (!fileInput.files || fileInput.files.length === 0) return;
+    let currentImportImage: HTMLImageElement | null = null;
+    let importResultDraft: any = null;
 
+    const fileInput = this.overlay.querySelector('#previewer-import-file') as HTMLInputElement;
+    const previewArea = this.overlay.querySelector('.import-preview-area') as HTMLDivElement;
+    const previewCanvas = this.overlay.querySelector('#import-preview-canvas') as HTMLCanvasElement;
+    const cropBox = this.overlay.querySelector('#import-crop-box') as HTMLDivElement;
+    
+    const cropXInput = this.overlay.querySelector('#import-crop-x') as HTMLInputElement;
+    const cropYInput = this.overlay.querySelector('#import-crop-y') as HTMLInputElement;
+    const cropSizeInput = this.overlay.querySelector('#import-crop-size') as HTMLInputElement;
+    
+    const updateCropBox = () => {
+      if (!currentImportImage) return;
+      const scale = previewCanvas.clientWidth / previewCanvas.width;
+      const x = parseInt(cropXInput.value) * scale;
+      const y = parseInt(cropYInput.value) * scale;
+      const size = parseInt(cropSizeInput.value) * scale;
+      
+      cropBox.style.left = `${x}px`;
+      cropBox.style.top = `${y}px`;
+      cropBox.style.width = `${size}px`;
+      cropBox.style.height = `${size}px`;
+    };
+
+    fileInput.addEventListener('change', () => {
+      if (!fileInput.files || fileInput.files.length === 0) return;
       const file = fileInput.files[0];
-      const alphaThreshold = parseInt((this.overlay.querySelector('#previewer-import-alpha') as HTMLInputElement).value) || 128;
-      const smoothing = (this.overlay.querySelector('#previewer-import-smooth') as HTMLInputElement).checked;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          currentImportImage = img;
+          previewArea.style.display = 'flex';
+          
+          // Setup preview canvas
+          previewCanvas.width = img.width;
+          previewCanvas.height = img.height;
+          const ctx = previewCanvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0);
+          
+          // Default center crop
+          const size = Math.min(img.width, img.height);
+          cropXInput.value = Math.floor((img.width - size) / 2).toString();
+          cropYInput.value = Math.floor((img.height - size) / 2).toString();
+          cropSizeInput.value = size.toString();
+          
+          updateCropBox();
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    this.overlay.querySelector('#import-center-crop')!.addEventListener('click', () => {
+      if (!currentImportImage) return;
+      const size = Math.min(currentImportImage.width, currentImportImage.height);
+      cropXInput.value = Math.floor((currentImportImage.width - size) / 2).toString();
+      cropYInput.value = Math.floor((currentImportImage.height - size) / 2).toString();
+      cropSizeInput.value = size.toString();
+      updateCropBox();
+    });
+
+    [cropXInput, cropYInput, cropSizeInput].forEach(input => {
+      input.addEventListener('input', updateCropBox);
+    });
+
+    this.overlay.querySelector('#import-pick-bg')!.addEventListener('click', () => {
+      if (!currentImportImage) return;
+      const ctx = previewCanvas.getContext('2d')!;
+      const pixel = ctx.getImageData(0, 0, 1, 1).data;
+      const hex = '#' + [pixel[0], pixel[1], pixel[2]].map(x => x.toString(16).padStart(2, '0')).join('');
+      (this.overlay.querySelector('#import-bg-color') as HTMLInputElement).value = hex;
+    });
+
+    const runImportProcess = async () => {
+      if (!currentImportImage) return null;
+      
+      const options = {
+        cropX: parseInt(cropXInput.value),
+        cropY: parseInt(cropYInput.value),
+        cropSize: parseInt(cropSizeInput.value),
+        removeBackground: (this.overlay.querySelector('#import-remove-bg') as HTMLInputElement).checked,
+        backgroundColor: (this.overlay.querySelector('#import-bg-color') as HTMLInputElement).value,
+        bgTolerance: parseInt((this.overlay.querySelector('#import-bg-tol') as HTMLInputElement).value),
+        colorCount: parseInt((this.overlay.querySelector('#import-color-count') as HTMLInputElement).value),
+        smoothing: (this.overlay.querySelector('#import-smooth') as HTMLInputElement).checked
+      };
 
       try {
-        const result = await imageToMatrix(file, {
-          alphaThreshold,
-          colorCount: 7,
-          smoothing
-        });
+        return await processImageToMatrix(currentImportImage, options);
+      } catch (err: any) {
+        this.errorDiv.textContent = `Import failed: ${err.message}`;
+        return null;
+      }
+    };
 
+    this.overlay.querySelector('#import-preview-btn')!.addEventListener('click', async () => {
+      const result = await runImportProcess();
+      if (result) {
+        importResultDraft = result;
+        
+        // Temporarily show it in the previewer without overwriting textarea
+        const tempMatrix = this.currentMatrix;
+        const tempPalette = this.currentPalette;
+        
+        this.currentMatrix = result.matrix;
+        this.currentPalette = result.palette;
+        this.updateMockSprite();
+        
+        this.errorDiv.textContent = 'Previewing import result. Click "Apply to Matrix" to keep it.';
+        setTimeout(() => this.errorDiv.textContent = '', 3000);
+        
+        // Restore state so it doesn't permanently overwrite until Applied
+        this.currentMatrix = tempMatrix;
+        this.currentPalette = tempPalette;
+      }
+    });
+
+    this.overlay.querySelector('#import-apply-btn')!.addEventListener('click', async () => {
+      const result = importResultDraft || await runImportProcess();
+      if (result) {
         this.currentMatrix = result.matrix;
         this.currentPalette = result.palette;
         
@@ -291,14 +429,10 @@ export class PixelSpritePreviewer {
         });
 
         this.updateMockSprite();
-        this.errorDiv.textContent = 'Image imported successfully as draft.';
+        this.errorDiv.textContent = 'Image applied to matrix successfully.';
         setTimeout(() => this.errorDiv.textContent = '', 3000);
-      } catch (err: any) {
-        this.errorDiv.textContent = `Import failed: ${err.message}`;
+        importResultDraft = null;
       }
-      
-      // Reset input so the same file can be selected again
-      fileInput.value = '';
     });
   }
 

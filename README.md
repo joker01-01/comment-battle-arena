@@ -149,8 +149,11 @@ CommentBattleArena/
 我们提供了一套完整的工具链，帮助你从零开始或基于参考图快速制作新角色，并立即在游戏中进行测试。推荐的制作顺序如下：
 
 1. **打开预览器 (Open Previewer)**：点击页面底部的 **Open Pixel Sprite Previewer** 按钮。
-2. **导入参考图 (Import Image)**：在左侧 **Import Image to Matrix** 区域，选择一张本地图片（如 PNG/JPG），调整 Alpha 阈值和 Smooth 选项并点击导入。这会自动提取颜色并生成一个 16x16 的矩阵草稿。（*注意：这只是草稿，导入后仍建议手动清理轮廓和颜色*）。
-3. **手动清理与调色 (Clean & Color)**：在左侧的文本框中修改 16x16 矩阵，清理杂乱像素；在右下角的 Palette Editor 中调整 7 色调色板，让颜色更克制、更有层次。
+2. **导入参考图 (Import Image)**：在左侧 **Import Image to Matrix v2** 区域，选择一张本地图片（如 PNG/JPG）。
+   - **裁剪主体 (Crop)**：调整 Crop X/Y/Size，确保只框选角色主体。
+   - **移除背景 (Remove Background)**：勾选 Remove Background，使用 Pick Top-Left 提取背景色，调整 Tolerance。
+   - **生成草稿 (Preview & Apply)**：点击 Preview Result，满意后点击 Apply to Matrix。导入结果只是草稿，不建议直接当最终角色。
+3. **手动清理与调色 (Clean & Color)**：在左侧的文本框中修改 16x16 矩阵，清理杂乱像素；在右下角的 Palette Editor 中调整 7 色调色板。如果导入结果很脏，通常是因为图太复杂、主体太小、背景没有去掉或 16x16 尺寸无法保留细节。
 4. **预览动画 (Preview Animation)**：在右上角的下拉框中切换不同动画状态（如 `move`, `attack`, `dash`），实时查看 Transform Keyframes 驱动的动态效果。
 5. **导出定义 (Copy Definition)**：调整满意后，点击 **Copy Definition** 按钮。打开 `src/data/pixelSprites.ts`，将复制的代码粘贴进去，并注册到 `sprites` 对象中。
 6. **生成配置 (Generate Config)**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。点击 **Copy CharacterConfig Draft**，粘贴到 `src/data/characters.ts` 中，并根据需要微调物理属性。
