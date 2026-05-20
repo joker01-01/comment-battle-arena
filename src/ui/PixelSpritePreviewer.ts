@@ -200,7 +200,7 @@ export class PixelSpritePreviewer {
               <button id="previewer-export-sheet" style="background: #4aa3ff; margin-left: 10px;">Export Animation Sheet</button>
             </div>
             <div class="previewer-canvas-container">
-              <canvas></canvas>
+              <canvas id="previewer-main-canvas"></canvas>
             </div>
             <div class="palette-editor" id="previewer-palette">
               ${[1, 2, 3, 4, 5, 6, 7].map(i => `
@@ -217,7 +217,7 @@ export class PixelSpritePreviewer {
 
     document.body.appendChild(this.overlay);
 
-    this.canvas = this.overlay.querySelector('canvas')!;
+    this.canvas = this.overlay.querySelector('#previewer-main-canvas')!;
     
     // Setup High-DPI Canvas
     const dpr = window.devicePixelRatio || 1;
