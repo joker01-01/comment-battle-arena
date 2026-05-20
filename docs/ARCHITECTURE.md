@@ -48,7 +48,7 @@ CommentBattleArena/
 3. **Collision System**：纯粹的物理法则。负责计算两个圆的交叠，应用冲量（Impulse）分离它们，并根据相对速度计算伤害。
 4. **Skill System**：解耦的事件响应。AI 决定“何时”触发，Skill 决定“发生什么”。技能可以修改实体状态、生成 Projectile 或 Effect。
 5. **PixelCharacterRenderer**：视觉欺骗。它不关心圆有多大，只负责在 `character.pos` 的位置，根据当前状态播放对应的 Transform Keyframes 动画，并严格对齐到逻辑像素网格。
-6. **Pixel Sprite Previewer**：开发辅助工具。不参与战斗核心循环，但完全复用 `PixelCharacterRenderer` 的渲染逻辑、`pixelSprites.ts` 的数据和 `defaultAnimations`。用于快速编辑 16x16 矩阵和调色板，并生成可复制的 Sprite Definition 代码。同时内置了 **CharacterConfig Generator** 和 **Episode Generator**，结合 `characterTemplates.ts` 提供战斗风格预设，大幅加速新角色入库流程。
+6. **Pixel Sprite Previewer**：开发辅助工具。不参与战斗核心循环，但完全复用 `PixelCharacterRenderer` 的渲染逻辑、`pixelSprites.ts` 的数据和 `defaultAnimations`。用于快速编辑 16x16 矩阵和调色板，并生成可复制的 Sprite Definition 代码。同时内置了 **CharacterConfig Generator**、**Episode Generator** 和 **Animation Sheet Exporter**，大幅加速新角色入库和 README 素材生成流程。
 7. **Custom Match Setup**：UI 辅助工具。允许用户在页面上自由选择左右角色和 Seed，在内存中动态生成临时的 `EpisodeConfig` 并传递给 `app.ts` 的 `restart()` 方法，从而绕过固定的 `episodes.ts` 列表启动战斗。它不参与核心物理/碰撞逻辑。
 
 ## Fixed Episode vs Custom Match

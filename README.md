@@ -26,55 +26,43 @@
 - Debug collider 可视化
 - 战斗结果统计与复制功能 (Copy Episode Result)
 - **Custom Match Setup** (自由选择左右角色、自定义 Seed 进行临时对战测试)
-- **Pixel Sprite Previewer 开发工具** (支持矩阵解析、动画预览)
+- **Pixel Sprite Previewer 开发工具** (支持矩阵解析、动画预览、导出 Animation Sheet)
 - **CharacterConfig & Episode Draft Generator** (辅助快速生成角色配置代码)
 - **矩阵编辑器的 `textarea` 保持等宽字体 (`monospace`) 以确保编辑时矩阵对齐，其他 UI 统一使用 Times New Roman。**
 
 ## 角色展示 (Character Showcase)
 
-> **TODO**: 补充录制并导出各角色的 GIF 动画至 `assets/readme/` 目录下。
+> **提示**: 以下展示的动作序列图 (Sprite Sheet) 可以通过 Pixel Sprite Previewer 的 **Export Animation Sheet** 功能直接导出。导出的 PNG 推荐放置在 `assets/readme/` 目录下。
 
 ### Shield Cat (盾盾猫)
 重装防御型，高护盾，慢速。外观特征为稳重的猫耳和左侧的重型盾牌。
-- **Idle**: 
-  ![Shield Cat Idle](assets/readme/shield_cat_idle.gif)
-- **Attack**: 
-  ![Shield Cat Attack](assets/readme/shield_cat_attack.gif)
+- **Move**: 
+  ![Shield Cat Move](./assets/readme/shield_cat_move_sheet.png)
 
 ### Rush Dog (冲刺狗)
 高速冲撞型，高冲量 Dash。外观特征为前倾的冲刺姿态和亮色的护目镜。
 - **Move**: 
-  ![Rush Dog Move](assets/readme/rush_dog_move.gif)
-- **Dash**: 
-  ![Rush Dog Dash](assets/readme/rush_dog_dash.gif)
+  ![Rush Dog Move](./assets/readme/rush_dog_move_sheet.png)
 
 ### Fire Wizard (火焰法师)
 远程风筝型，低血量，发射火球。外观特征为标志性的尖顶法师帽和发光的法杖。
-- **Idle**: 
-  ![Fire Wizard Idle](assets/readme/fire_wizard_idle.gif)
-- **Skill (Fireball)**: 
-  ![Fire Wizard Skill](assets/readme/fire_wizard_skill.gif)
+- **Move**: 
+  ![Fire Wizard Move](./assets/readme/fire_wizard_move_sheet.png)
 
 ### Heal Bot (回血机器人)
 消耗防守型，自动回血。外观特征为方正的机械轮廓和胸前的绿色十字标志。
-- **Idle**: 
-  ![Heal Bot Idle](assets/readme/heal_bot_idle.gif)
-- **Skill (Heal)**: 
-  ![Heal Bot Skill](assets/readme/heal_bot_skill.gif)
+- **Move**: 
+  ![Heal Bot Move](./assets/readme/heal_bot_move_sheet.png)
 
 ### Split Slime (分裂史莱姆)
 召唤消耗型，受击分裂小史莱姆。外观特征为圆润Q弹的果冻状半透明身体。
 - **Move**: 
-  ![Split Slime Move](assets/readme/split_slime_move.gif)
-- **Hit (Split)**: 
-  ![Split Slime Hit](assets/readme/split_slime_hit.gif)
+  ![Split Slime Move](./assets/readme/split_slime_move_sheet.png)
 
 ### Mirror Knight (反伤骑士)
 防守反击型，概率反弹伤害。外观特征为挺拔的身躯和带有高光渐变的镜面盾牌。
-- **Idle**: 
-  ![Mirror Knight Idle](assets/readme/mirror_knight_idle.gif)
-- **Skill (Reflect)**: 
-  ![Mirror Knight Skill](assets/readme/mirror_knight_skill.gif)
+- **Move**: 
+  ![Mirror Knight Move](./assets/readme/mirror_knight_move_sheet.png)
 
 ## 本地运行方式
 
