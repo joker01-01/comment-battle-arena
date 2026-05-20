@@ -32,7 +32,7 @@
 
 ## 角色展示 (Character Showcase)
 
-> **提示**: 以下展示的动作序列图 (Sprite Sheet) 可以通过 Pixel Sprite Previewer 的 **Export Animation Sheet** 功能直接导出。导出的 PNG 推荐放置在 `assets/readme/` 目录下。
+> **提示**: 以下展示的动作序列图 (Sprite Sheet) 可以通过运行 `npm run export:readme-sheets` 自动生成，或者通过 Pixel Sprite Previewer 的 **Export Animation Sheet** 功能手动导出。导出的 PNG 会自动保存在 `assets/readme/` 目录下。
 
 ### Shield Cat (盾盾猫)
 重装防御型，高护盾，慢速。外观特征为稳重的猫耳和左侧的重型盾牌。

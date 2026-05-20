@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "export:readme-sheets": "tsx scripts/exportReadmeSheets.ts"
   },
   "devDependencies": {
+    "playwright": "^1.60.0",
+    "tsx": "^4.22.3",
     "typescript": "~6.0.2",
     "vite": "^5.4.11",
     "vitest": "^1.6.1"

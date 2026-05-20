@@ -7,6 +7,12 @@ import './skills/healSkill';
 import './skills/splitSummonSkill';
 import './skills/reflectSkill';
 import { App } from './app';
+import { generateAnimationSheetDataUrl } from './utils/animationSheetExporter';
+
+// Expose for automated scripts
+(window as any).__CBA_EXPORT_ANIMATION_SHEET__ = (options: { spriteId: string, animationName: string }) => {
+  return generateAnimationSheetDataUrl(options.spriteId, options.animationName as any);
+};
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div class="header">

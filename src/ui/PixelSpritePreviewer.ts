@@ -6,6 +6,7 @@ import { Vector2 } from '../core/vector';
 import { characterTemplates } from '../data/characterTemplates';
 import { defaultAnimations } from '../rendering/pixelAnimations';
 import { UI_FONT_FAMILY } from '../rendering/textStyles';
+import { generateAnimationSheetDataUrl } from '../utils/animationSheetExporter';
 
 export class PixelSpritePreviewer {
   private overlay!: HTMLDivElement;
@@ -384,69 +385,18 @@ export class PixelSpritePreviewer {
     const spriteId = this.spriteSelect.value;
     const animationName = this.animSelect.value as PixelAnimationName;
     
-    const anim = defaultAnimations[animationName];
-    if (!anim) return;
-
-    const duration = anim.duration || 1;
-    const fps = anim.fps || 8;
+    this.updateMockSprite(); // Ensure current edits are in the registry as 'preview_sprite'
     
-    let frameCount = Math.ceil(duration * fps);
-    if (frameCount < 4) frameCount = 4;
-    if (frameCount > 10) frameCount = 10;
-
-    const frameSize = 96;
-    const spacing = 12;
-    const headerHeight = 40;
-    
-    const width = frameCount * frameSize + (frameCount - 1) * spacing + spacing * 2;
-    const height = frameSize + headerHeight + spacing;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d')!;
-    ctx.imageSmoothingEnabled = false;
-
-    // Background
-    ctx.fillStyle = '#0f0f0f';
-    ctx.fillRect(0, 0, width, height);
-
-    // Header text
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `bold 20px ${UI_FONT_FAMILY}`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(`${spriteId} / ${animationName}`, spacing, spacing);
-
-    this.updateMockSprite();
-
-    for (let i = 0; i < frameCount; i++) {
-      const time = (i / frameCount) * duration;
+    try {
+      const dataUrl = generateAnimationSheetDataUrl('preview_sprite', animationName);
       
-      const x = spacing + i * (frameSize + spacing) + frameSize / 2;
-      const y = headerHeight + frameSize / 2;
-
-      ctx.save();
-      ctx.translate(x, y);
-      
-      // Clone mock character to override stateEntryTime without affecting preview
-      const exportChar = {
-        ...this.mockCharacter,
-        stateData: {
-          ...this.mockCharacter.stateData,
-          stateEntryTime: 0
-        }
-      };
-      
-      this.renderer.drawCharacter(ctx, exportChar as any, time);
-      ctx.restore();
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `${spriteId}_${animationName}_sheet.png`;
+      a.click();
+    } catch (e: any) {
+      this.errorDiv.textContent = e.message;
     }
-
-    const url = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${spriteId}_${animationName}_sheet.png`;
-    a.click();
   }
 
   public open() {
