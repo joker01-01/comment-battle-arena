@@ -48,8 +48,9 @@ CommentBattleArena/
 3. **Collision System**：纯粹的物理法则。负责计算两个圆的交叠，应用冲量（Impulse）分离它们，并根据相对速度计算伤害。
 4. **Skill System**：解耦的事件响应。AI 决定“何时”触发，Skill 决定“发生什么”。技能可以修改实体状态、生成 Projectile 或 Effect。
 5. **PixelCharacterRenderer**：视觉欺骗。它不关心圆有多大，只负责在 `character.pos` 的位置，根据当前状态播放对应的 Transform Keyframes 动画，并严格对齐到逻辑像素网格。
-6. **Pixel Sprite Previewer**：开发辅助工具。不参与战斗核心循环，但完全复用 `PixelCharacterRenderer` 的渲染逻辑、`pixelSprites.ts` 的数据和 `defaultAnimations`。用于快速编辑 16x16 矩阵和调色板，并生成可复制的 Sprite Definition 代码。同时内置了 **CharacterConfig Generator**、**Episode Generator** 和 **Animation Sheet Exporter**，大幅加速新角色入库和 README 素材生成流程。
+6. **Pixel Sprite Previewer**：开发辅助工具。不参与战斗核心循环，但完全复用 `PixelCharacterRenderer` 的渲染逻辑、`pixelSprites.ts` 的数据和 `defaultAnimations`。用于快速编辑 16x16 矩阵和调色板，并生成可复制的 Sprite Definition 代码。同时内置了 **CharacterConfig Generator**、**Episode Generator**、**Animation Sheet Exporter** 和 **Image to Matrix Importer**，大幅加速新角色入库和 README 素材生成流程。
    - **Animation Sheet Exporter** 有两种入口：(1) Previewer 手动导出；(2) `npm run export:readme-sheets` 自动导出 README 素材。自动导出脚本通过 Playwright 访问开发环境暴露的 API 生成 PNG，不修改 BattleEngine 或物理循环。
+   - **Image to Matrix Importer** (`src/utils/imageToMatrix.ts`) 仅在 Previewer 中使用，提供基础的图像缩放和颜色量化（RGB 距离聚类），辅助生成角色草稿，不影响核心逻辑。
 7. **Custom Match Setup**：UI 辅助工具。允许用户在页面上自由选择左右角色和 Seed，在内存中动态生成临时的 `EpisodeConfig` 并传递给 `app.ts` 的 `restart()` 方法，从而绕过固定的 `episodes.ts` 列表启动战斗。它不参与核心物理/碰撞逻辑。
 
 ## Fixed Episode vs Custom Match
@@ -63,11 +64,11 @@ CommentBattleArena/
 
 1. **更新 AI**：遍历所有 `CharacterEntity`，执行其 `behaviorType` 对应的 AI 逻辑。AI 仅负责触发技能（调用 `tryAttack` 等），**不直接修改加速度或速度**。
 2. **实体 Update**：
-   - `CharacterEntity`：应用 `baseSpeed` 速度修正（抵消摩擦力），更新各类 Timer（冷却、眩晕）。
-   - `ProjectileEntity` / `EffectEntity`：更新位置、生命周期。
+  - `CharacterEntity`：应用 `baseSpeed` 速度修正（抵消摩擦力），更新各类 Timer（冷却、眩晕）。
+  - `ProjectileEntity` / `EffectEntity`：更新位置、生命周期。
 3. **物理迭代 (多次循环以保证稳定性)**：
-   - **处理角色碰撞** (`handleCollisions`)：两两检测距离，若重叠则调用 `resolveCircleCollision` 进行位置修正、冲量计算和伤害判定。
-   - **处理墙体碰撞** (`constrainToArena`)：检测实体是否超出边界，若超出则反弹并修正位置。
+  - **处理角色碰撞** (`handleCollisions`)：两两检测距离，若重叠则调用 `resolveCircleCollision` 进行位置修正、冲量计算和伤害判定。
+  - **处理墙体碰撞** (`constrainToArena`)：检测实体是否超出边界，若超出则反弹并修正位置。
 4. **清理死亡实体**：移除 `isDead === true` 的实体。
 5. **胜负判定**：检查 Team A 和 Team B 的存活情况，若一方全灭则结束战斗。
 6. **渲染场景**：调用 `Renderer.render`，清空画布，依次绘制特效、弹体、角色和 UI（伤害数字、血条）。Canvas 初始化时根据 `window.devicePixelRatio` 缩放 backing store 分辨率，并使用 `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` 保证逻辑坐标系依然是 CSS 像素，确保物理坐标和 collider 居中对齐。UI 文本统一使用 `src/rendering/textStyles.ts` 中的 Times New Roman 样式。
@@ -98,3 +99,4 @@ CommentBattleArena/
 - **坚持动量驱动**：不要给角色添加类似 `moveTo(x, y)` 的绝对坐标修改逻辑。所有的移动必须通过修改 `velocity` 或施加 Impulse 来实现。
 - **状态机优先**：新增动画表现时，优先在 `CharacterEntity` 中增加状态标识（如 `isCharging`），让 Renderer 去读取状态，而不是在业务逻辑里直接控制渲染器。
 - **技能沙盒化**：所有复杂的业务逻辑（如分裂、反伤、吸血）都必须封装在独立的 `Skill` 实现中，不要污染 `CharacterEntity` 的核心 `update` 循环。
+

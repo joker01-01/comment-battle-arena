@@ -4,9 +4,8 @@ import { parsePixelMatrix } from '../utils/matrixParser';
 import type { PixelAnimationName } from '../rendering/PixelCharacterRenderer';
 import { Vector2 } from '../core/vector';
 import { characterTemplates } from '../data/characterTemplates';
-import { defaultAnimations } from '../rendering/pixelAnimations';
-import { UI_FONT_FAMILY } from '../rendering/textStyles';
 import { generateAnimationSheetDataUrl } from '../utils/animationSheetExporter';
+import { imageToMatrix } from '../utils/imageToMatrix';
 
 export class PixelSpritePreviewer {
   private overlay!: HTMLDivElement;
@@ -78,6 +77,20 @@ export class PixelSpritePreviewer {
               <button id="previewer-copy-matrix">Copy Matrix</button>
               <button id="previewer-copy-def">Copy Definition</button>
             </div>
+            
+            <div class="import-section">
+              <h4>Import Image to Matrix</h4>
+              <div class="import-controls">
+                <input type="file" id="previewer-import-file" accept="image/png, image/jpeg, image/webp">
+                <label title="Pixels with alpha below this will be transparent">
+                  Alpha Thresh: <input type="number" id="previewer-import-alpha" value="128" min="0" max="255" style="width: 50px;">
+                </label>
+                <label title="Smooth resize before quantization (good for photos)">
+                  <input type="checkbox" id="previewer-import-smooth"> Smooth
+                </label>
+              </div>
+            </div>
+
             <textarea id="previewer-matrix-input" spellcheck="false"></textarea>
             <div class="previewer-error" id="previewer-error"></div>
           </div>
@@ -250,6 +263,42 @@ export class PixelSpritePreviewer {
 
     this.overlay.querySelector('#previewer-export-sheet')!.addEventListener('click', () => {
       this.exportAnimationSheet();
+    });
+
+    this.overlay.querySelector('#previewer-import-file')!.addEventListener('change', async (e) => {
+      const fileInput = e.target as HTMLInputElement;
+      if (!fileInput.files || fileInput.files.length === 0) return;
+
+      const file = fileInput.files[0];
+      const alphaThreshold = parseInt((this.overlay.querySelector('#previewer-import-alpha') as HTMLInputElement).value) || 128;
+      const smoothing = (this.overlay.querySelector('#previewer-import-smooth') as HTMLInputElement).checked;
+
+      try {
+        const result = await imageToMatrix(file, {
+          alphaThreshold,
+          colorCount: 7,
+          smoothing
+        });
+
+        this.currentMatrix = result.matrix;
+        this.currentPalette = result.palette;
+        
+        this.textarea.value = this.getMatrixString();
+        
+        this.paletteInputs.forEach(input => {
+          const index = parseInt(input.dataset.index!);
+          input.value = this.currentPalette[index] || '#000000';
+        });
+
+        this.updateMockSprite();
+        this.errorDiv.textContent = 'Image imported successfully as draft.';
+        setTimeout(() => this.errorDiv.textContent = '', 3000);
+      } catch (err: any) {
+        this.errorDiv.textContent = `Import failed: ${err.message}`;
+      }
+      
+      // Reset input so the same file can be selected again
+      fileInput.value = '';
     });
   }
 

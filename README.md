@@ -123,8 +123,9 @@ CommentBattleArena/
 ## 如何新增角色 (从 Previewer 到新角色入库)
 
 1. **打开预览器**：点击页面底部的 **Open Pixel Sprite Previewer** 按钮。
-2. **编辑矩阵**：在下拉框选择 `example_custom_character` 作为起点，或者直接在左侧输入 16x16 矩阵。
-3. **调整预览**：调整调色板颜色，切换不同动画状态（如 dash, hit）预览动态效果。
+2. **导入参考图 (可选)**：在左侧 **Import Image to Matrix** 区域，选择一张本地图片（如 PNG/JPG），调整 Alpha 阈值并点击导入。这会自动生成一个 16x16 的矩阵草稿和提取的调色板。（注意：这只是草稿，导入后仍建议手动清理轮廓和颜色）。
+3. **编辑矩阵**：在下拉框选择 `example_custom_character` 作为起点，或者基于刚才导入的草稿，在左侧输入框修改 16x16 矩阵。
+4. **调整预览**：调整调色板颜色，切换不同动画状态（如 dash, hit）预览动态效果。
 4. **复制 Sprite 定义**：调整满意后，点击 **Copy Definition** 按钮。打开 `src/data/pixelSprites.ts`，将复制的代码粘贴进去，并注册到 `sprites` 对象中。
 5. **生成 CharacterConfig 草稿**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。点击 **Copy CharacterConfig Draft**。
 6. **配置属性**：打开 `src/data/characters.ts`，粘贴刚刚生成的配置代码，并根据需要微调物理属性。
