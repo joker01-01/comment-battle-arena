@@ -3,7 +3,7 @@
 ## Project Snapshot
 
 **Date**: 2026-05-20
-**Current Stage**: MVP 已经具备像素角色、圆形刚体物理、自动对战、Transform Keyframes 动画和基础技能效果。基础架构和数据层（如 `pixelSprites.ts`）已拆分完毕。Pixel Sprite Previewer 已经完成，并集成了 CharacterConfig 和 Episode 草稿生成器，角色生产工具链进入可用阶段。已加入 Custom Match Setup 自由选角功能。
+**Current Stage**: MVP 已经具备像素角色、圆形刚体物理、自动对战、Transform Keyframes 动画和基础技能效果。基础架构和数据层（如 `pixelSprites.ts`）已拆分完毕。Pixel Sprite Previewer 已经完成，并集成了 CharacterConfig 和 Episode 草稿生成器，角色生产工具链进入可用阶段。已加入 Custom Match Setup 自由选角功能。当前阶段重点从功能开发转向角色美术优化，6 个默认角色的像素外观正在打磨，并在 README 中新增了角色展示区，暂不推进 Publishing Helper。
 
 ## Core Product Idea
 

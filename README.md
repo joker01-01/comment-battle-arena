@@ -30,6 +30,52 @@
 - **CharacterConfig & Episode Draft Generator** (辅助快速生成角色配置代码)
 - **矩阵编辑器的 `textarea` 保持等宽字体 (`monospace`) 以确保编辑时矩阵对齐，其他 UI 统一使用 Times New Roman。**
 
+## 角色展示 (Character Showcase)
+
+> **TODO**: 补充录制并导出各角色的 GIF 动画至 `assets/readme/` 目录下。
+
+### Shield Cat (盾盾猫)
+重装防御型，高护盾，慢速。外观特征为稳重的猫耳和左侧的重型盾牌。
+- **Idle**: 
+  ![Shield Cat Idle](assets/readme/shield_cat_idle.gif)
+- **Attack**: 
+  ![Shield Cat Attack](assets/readme/shield_cat_attack.gif)
+
+### Rush Dog (冲刺狗)
+高速冲撞型，高冲量 Dash。外观特征为前倾的冲刺姿态和亮色的护目镜。
+- **Move**: 
+  ![Rush Dog Move](assets/readme/rush_dog_move.gif)
+- **Dash**: 
+  ![Rush Dog Dash](assets/readme/rush_dog_dash.gif)
+
+### Fire Wizard (火焰法师)
+远程风筝型，低血量，发射火球。外观特征为标志性的尖顶法师帽和发光的法杖。
+- **Idle**: 
+  ![Fire Wizard Idle](assets/readme/fire_wizard_idle.gif)
+- **Skill (Fireball)**: 
+  ![Fire Wizard Skill](assets/readme/fire_wizard_skill.gif)
+
+### Heal Bot (回血机器人)
+消耗防守型，自动回血。外观特征为方正的机械轮廓和胸前的绿色十字标志。
+- **Idle**: 
+  ![Heal Bot Idle](assets/readme/heal_bot_idle.gif)
+- **Skill (Heal)**: 
+  ![Heal Bot Skill](assets/readme/heal_bot_skill.gif)
+
+### Split Slime (分裂史莱姆)
+召唤消耗型，受击分裂小史莱姆。外观特征为圆润Q弹的果冻状半透明身体。
+- **Move**: 
+  ![Split Slime Move](assets/readme/split_slime_move.gif)
+- **Hit (Split)**: 
+  ![Split Slime Hit](assets/readme/split_slime_hit.gif)
+
+### Mirror Knight (反伤骑士)
+防守反击型，概率反弹伤害。外观特征为挺拔的身躯和带有高光渐变的镜面盾牌。
+- **Idle**: 
+  ![Mirror Knight Idle](assets/readme/mirror_knight_idle.gif)
+- **Skill (Reflect)**: 
+  ![Mirror Knight Skill](assets/readme/mirror_knight_skill.gif)
+
 ## 本地运行方式
 
 1. 安装依赖：
@@ -141,7 +187,7 @@ Previewer 左侧的输入框支持极其宽松的解析格式：
 ## 当前 TODO / 下一阶段计划
 
 - **更多技能接入 charge / skill 状态**：基础状态字段已接入，Rush Dog 已使用 charge，更多技能待进一步接入。
-- **视频录制 / 回放 / 导出辅助**：方便将对战过程直接导出为短视频素材。
+- **角色美术优化**：当前阶段重点从功能开发转向角色美术优化，6 个默认角色的像素外观正在打磨，并在 README 中新增了角色展示区。暂不推进 Publishing Helper。
 - **更完整的 Previewer 使用示例和角色制作教程**。
 - **技能和状态机测试覆盖**。
 

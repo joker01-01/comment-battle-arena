@@ -25,6 +25,8 @@
 
 ### Changed
 
+- **角色美术优化**：全面重绘了 6 个默认角色（Shield Cat, Rush Dog, Fire Wizard, Heal Bot, Split Slime, Mirror Knight）的 16x16 像素矩阵，提升了头身比、轮廓特征和颜色层次，减少了杂乱像素点。
+- **README 更新**：在 README.md 中新增了“角色展示”章节，预留了各角色关键动作的 GIF 展示位，并添加了角色视觉特征说明。
 - 角色视觉从简单的 Canvas 图形升级为 16x16 像素矩阵
 - Projectile 和 Effects 的渲染方式改为严格对齐网格的像素风
 - 动画状态由基于速度的简单判断升级为数据驱动的优先级状态机
@@ -40,3 +42,4 @@
 - 视频录制 / 回放 / 导出辅助
 - 更完整的 Previewer 使用示例和角色制作教程
 - 技能和状态机测试覆盖
+
