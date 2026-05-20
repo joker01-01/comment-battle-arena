@@ -35,34 +35,58 @@
 > **提示**: 以下展示的动作序列图 (Sprite Sheet) 可以通过运行 `npm run export:readme-sheets` 自动生成，或者通过 Pixel Sprite Previewer 的 **Export Animation Sheet** 功能手动导出。导出的 PNG 会自动保存在 `assets/readme/` 目录下。
 
 ### Shield Cat (盾盾猫)
-重装防御型，高护盾，慢速。外观特征为稳重的猫耳和左侧的重型盾牌。
+
+**定位**：重装防御型，高护盾，慢速。
+**视觉特征**：稳重的猫耳和左侧的重型盾牌。
+**动作特点**：移动时沉稳，受击时盾牌会有明显的闪烁反馈。
+
 - **Move**: 
-  ![Shield Cat Move](./assets/readme/shield_cat_move_sheet.png)
+Shield Cat Move
 
 ### Rush Dog (冲刺狗)
-高速冲撞型，高冲量 Dash。外观特征为前倾的冲刺姿态和亮色的护目镜。
+
+**定位**：高速冲撞型，高冲量 Dash。
+**视觉特征**：前倾的冲刺姿态和亮色的护目镜。
+**动作特点**：移动时有强烈的向前倾斜感，冲刺（Dash）前会有短暂的蓄力（Charge）动作。
+
 - **Move**: 
-  ![Rush Dog Move](./assets/readme/rush_dog_move_sheet.png)
+Rush Dog Move
 
 ### Fire Wizard (火焰法师)
-远程风筝型，低血量，发射火球。外观特征为标志性的尖顶法师帽和发光的法杖。
+
+**定位**：远程风筝型，低血量，发射火球。
+**视觉特征**：标志性的尖顶法师帽和带有发光宝石的法杖。
+**动作特点**：移动时法杖会随之摆动，施法（Skill）时法杖宝石会高亮闪烁。
+
 - **Move**: 
-  ![Fire Wizard Move](./assets/readme/fire_wizard_move_sheet.png)
+Fire Wizard Move
 
 ### Heal Bot (回血机器人)
-消耗防守型，自动回血。外观特征为方正的机械轮廓和胸前的绿色十字标志。
+
+**定位**：消耗防守型，自动回血。
+**视觉特征**：方正的机械轮廓、分明的关节和胸前的绿色十字标志。
+**动作特点**：移动时有机械的上下起伏感，回血时身上会冒出绿色十字粒子特效。
+
 - **Move**: 
-  ![Heal Bot Move](./assets/readme/heal_bot_move_sheet.png)
+Heal Bot Move
 
 ### Split Slime (分裂史莱姆)
-召唤消耗型，受击分裂小史莱姆。外观特征为圆润Q弹的果冻状半透明身体。
+
+**定位**：召唤消耗型，受击分裂小史莱姆。
+**视觉特征**：圆润Q弹的果冻状半透明身体，内部有高光。
+**动作特点**：移动时像果冻一样挤压拉伸（Squash and Stretch），受击时会剧烈形变并分裂。
+
 - **Move**: 
-  ![Split Slime Move](./assets/readme/split_slime_move_sheet.png)
+Split Slime Move
 
 ### Mirror Knight (反伤骑士)
-防守反击型，概率反弹伤害。外观特征为挺拔的身躯和带有高光渐变的镜面盾牌。
+
+**定位**：防守反击型，概率反弹伤害。
+**视觉特征**：挺拔的身躯和带有高光渐变的镜面盾牌。
+**动作特点**：移动时步伐坚定，触发反弹（Reflect）时盾牌会发出强烈的闪光特效。
+
 - **Move**: 
-  ![Mirror Knight Move](./assets/readme/mirror_knight_move_sheet.png)
+Mirror Knight Move
 
 ## 本地运行方式
 
@@ -120,18 +144,18 @@ CommentBattleArena/
 4. 如果觉得这场对战很有趣，可以点击 **Copy Episode Draft**，将生成的配置代码粘贴到 `src/data/episodes.ts` 中永久保存。
 5. 点击顶部的 **Prev Episode** 或 **Next Episode** 按钮，可以随时切回代码中固定的 Episode 剧本流程。
 
-## 如何新增角色 (从 Previewer 到新角色入库)
+## 角色制作完整工作流 (Character Creation Workflow)
 
-1. **打开预览器**：点击页面底部的 **Open Pixel Sprite Previewer** 按钮。
-2. **导入参考图 (可选)**：在左侧 **Import Image to Matrix** 区域，选择一张本地图片（如 PNG/JPG），调整 Alpha 阈值并点击导入。这会自动生成一个 16x16 的矩阵草稿和提取的调色板。（注意：这只是草稿，导入后仍建议手动清理轮廓和颜色）。
-3. **编辑矩阵**：在下拉框选择 `example_custom_character` 作为起点，或者基于刚才导入的草稿，在左侧输入框修改 16x16 矩阵。
-4. **调整预览**：调整调色板颜色，切换不同动画状态（如 dash, hit）预览动态效果。
-4. **复制 Sprite 定义**：调整满意后，点击 **Copy Definition** 按钮。打开 `src/data/pixelSprites.ts`，将复制的代码粘贴进去，并注册到 `sprites` 对象中。
-5. **生成 CharacterConfig 草稿**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。点击 **Copy CharacterConfig Draft**。
-6. **配置属性**：打开 `src/data/characters.ts`，粘贴刚刚生成的配置代码，并根据需要微调物理属性。
-7. **快速测试**：新角色加入 `characters.ts` 后，刷新页面，即可在 **Custom Match Setup** 面板的下拉框中选择该角色进行快速测试，**不必先写固定 Episode**。
-8. **生成 Episode 草稿**：测试满意后，可以在 Custom Match Setup 中点击 **Copy Episode Draft**，或者在 Previewer 中生成。
-9. **创建对战**：打开 `src/data/episodes.ts`，将生成的 Episode 配置粘贴到 `episodes` 数组中。
+我们提供了一套完整的工具链，帮助你从零开始或基于参考图快速制作新角色，并立即在游戏中进行测试。推荐的制作顺序如下：
+
+1. **打开预览器 (Open Previewer)**：点击页面底部的 **Open Pixel Sprite Previewer** 按钮。
+2. **导入参考图 (Import Image)**：在左侧 **Import Image to Matrix** 区域，选择一张本地图片（如 PNG/JPG），调整 Alpha 阈值和 Smooth 选项并点击导入。这会自动提取颜色并生成一个 16x16 的矩阵草稿。（*注意：这只是草稿，导入后仍建议手动清理轮廓和颜色*）。
+3. **手动清理与调色 (Clean & Color)**：在左侧的文本框中修改 16x16 矩阵，清理杂乱像素；在右下角的 Palette Editor 中调整 7 色调色板，让颜色更克制、更有层次。
+4. **预览动画 (Preview Animation)**：在右上角的下拉框中切换不同动画状态（如 `move`, `attack`, `dash`），实时查看 Transform Keyframes 驱动的动态效果。
+5. **导出定义 (Copy Definition)**：调整满意后，点击 **Copy Definition** 按钮。打开 `src/data/pixelSprites.ts`，将复制的代码粘贴进去，并注册到 `sprites` 对象中。
+6. **生成配置 (Generate Config)**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。点击 **Copy CharacterConfig Draft**，粘贴到 `src/data/characters.ts` 中，并根据需要微调物理属性。
+7. **快速测试 (Custom Match Test)**：刷新页面，在 **Custom Match Setup** 面板的下拉框中直接选择你的新角色，点击 Start Custom Match 立即进行对战测试，**不必先写固定 Episode**。
+8. **导出展示图 (Export README PNG)**：测试满意后，在 Previewer 中使用 **Export Animation Sheet** 导出动作序列图，或通过 `npm run export:readme-sheets` 批量导出，放到 `assets/readme/` 下用于展示。
 
 ### 关于矩阵解析器 (Matrix Parser)
 
