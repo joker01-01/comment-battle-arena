@@ -41,7 +41,7 @@
 **动作特点**：移动时沉稳，受击时盾牌会有明显的闪烁反馈。
 
 - **Move**: 
-Shield Cat Move
+  ![Shield Cat Move](./assets/readme/shield_cat_move_sheet.png)
 
 ### Rush Dog (冲刺狗)
 
@@ -50,7 +50,7 @@ Shield Cat Move
 **动作特点**：移动时有强烈的向前倾斜感，冲刺（Dash）前会有短暂的蓄力（Charge）动作。
 
 - **Move**: 
-Rush Dog Move
+  ![Rush Dog Move](./assets/readme/rush_dog_move_sheet.png)
 
 ### Fire Wizard (火焰法师)
 
@@ -59,7 +59,7 @@ Rush Dog Move
 **动作特点**：移动时法杖会随之摆动，施法（Skill）时法杖宝石会高亮闪烁。
 
 - **Move**: 
-Fire Wizard Move
+  ![Fire Wizard Move](./assets/readme/fire_wizard_move_sheet.png)
 
 ### Heal Bot (回血机器人)
 
@@ -68,7 +68,7 @@ Fire Wizard Move
 **动作特点**：移动时有机械的上下起伏感，回血时身上会冒出绿色十字粒子特效。
 
 - **Move**: 
-Heal Bot Move
+  ![Heal Bot Move](./assets/readme/heal_bot_move_sheet.png)
 
 ### Split Slime (分裂史莱姆)
 
@@ -77,7 +77,7 @@ Heal Bot Move
 **动作特点**：移动时像果冻一样挤压拉伸（Squash and Stretch），受击时会剧烈形变并分裂。
 
 - **Move**: 
-Split Slime Move
+  ![Split Slime Move](./assets/readme/split_slime_move_sheet.png)
 
 ### Mirror Knight (反伤骑士)
 
@@ -86,7 +86,7 @@ Split Slime Move
 **动作特点**：移动时步伐坚定，触发反弹（Reflect）时盾牌会发出强烈的闪光特效。
 
 - **Move**: 
-Mirror Knight Move
+  ![Mirror Knight Move](./assets/readme/mirror_knight_move_sheet.png)
 
 ## 本地运行方式
 
