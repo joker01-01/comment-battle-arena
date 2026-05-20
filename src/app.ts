@@ -55,18 +55,31 @@ export class App {
     const leftSelect = document.getElementById('setupLeftChar') as HTMLSelectElement;
     const rightSelect = document.getElementById('setupRightChar') as HTMLSelectElement;
     
+    // Save current selection if any
+    const currentLeft = leftSelect.value;
+    const currentRight = rightSelect.value;
+    
     const chars = getAllCharacterConfigs();
     let optionsHtml = '';
     for (const c of chars) {
-      optionsHtml += `<option value="${c.id}">${c.name}</option>`;
+      const isTemp = c.id.startsWith('char_') && !c.id.match(/shield_cat|rush_dog|fire_wizard|heal_bot|split_slime|mirror_knight/);
+      const prefix = isTemp ? '[Temp] ' : '';
+      optionsHtml += `<option value="${c.id}">${prefix}${c.name}</option>`;
     }
     
     leftSelect.innerHTML = optionsHtml;
     rightSelect.innerHTML = optionsHtml;
 
-    // Set defaults if available
-    if (chars.length >= 2) {
+    // Restore selection or set defaults
+    if (currentLeft && Array.from(leftSelect.options).some(o => o.value === currentLeft)) {
+      leftSelect.value = currentLeft;
+    } else if (chars.length >= 2) {
       leftSelect.value = chars[0].id;
+    }
+    
+    if (currentRight && Array.from(rightSelect.options).some(o => o.value === currentRight)) {
+      rightSelect.value = currentRight;
+    } else if (chars.length >= 2) {
       rightSelect.value = chars[1].id;
     }
 
@@ -140,6 +153,13 @@ export class App {
       navigator.clipboard.writeText(draft).then(() => {
         alert('Episode draft copied.');
       });
+    });
+
+    window.addEventListener('tempCharacterRegistered', (e: any) => {
+      this.setupCustomMatchUI();
+      const leftSelect = document.getElementById('setupLeftChar') as HTMLSelectElement;
+      leftSelect.value = e.detail.characterId;
+      leftSelect.dispatchEvent(new Event('change'));
     });
 
     window.addEventListener('battleLog', (e: any) => {

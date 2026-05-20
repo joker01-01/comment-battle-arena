@@ -17,7 +17,8 @@ CommentBattleArena/
 │  ├─ data/
 │  │  ├─ characters.ts        # 角色配置组装
 │  │  ├─ episodes.ts          # 对战剧本定义
-│  │  └─ pixelSprites.ts      # 16x16 像素矩阵和调色板数据
+│  │  ├─ pixelSprites.ts      # 16x16 像素矩阵和调色板数据
+│  │  └─ runtimeCharacters.ts # 前端内存中的临时角色注册表
 │  ├─ entities/
 │  │  ├─ Entity.ts            # 所有场上物体的基类
 │  │  ├─ CharacterEntity.ts   # 核心战斗角色，包含状态机和速度修正逻辑
@@ -51,8 +52,9 @@ CommentBattleArena/
 6. **Pixel Sprite Previewer**：开发辅助工具。不参与战斗核心循环，但完全复用 `PixelCharacterRenderer` 的渲染逻辑、`pixelSprites.ts` 的数据和 `defaultAnimations`。用于快速编辑 16x16 矩阵和调色板，并生成可复制的 Sprite Definition 代码。同时内置了 **CharacterConfig Generator**、**Episode Generator**、**Animation Sheet Exporter** 和 **Image to Matrix Importer**，大幅加速新角色入库和 README 素材生成流程。
    - **Animation Sheet Exporter** 有两种入口：(1) Previewer 手动导出；(2) `npm run export:readme-sheets` 自动导出 README 素材。自动导出脚本通过 Playwright 访问开发环境暴露的 API 生成 PNG，不修改 BattleEngine 或物理循环。
    - **Image to Matrix Importer** (`src/utils/imageToMatrix.ts`) 仅在 Previewer 中使用，提供基础的图像缩放和颜色量化（RGB 距离聚类），辅助生成角色草稿，不影响核心逻辑。
-     - **Image to Matrix Pipeline**: Input Image -> Crop -> Optional Background Removal -> Resize to 16x16 -> Palette Extraction -> Matrix Mapping -> Manual Cleanup。
-7. **Custom Match Setup**：UI 辅助工具。允许用户在页面上自由选择左右角色和 Seed，在内存中动态生成临时的 `EpisodeConfig` 并传递给 `app.ts` 的 `restart()` 方法，从而绕过固定的 `episodes.ts` 列表启动战斗。它不参与核心物理/碰撞逻辑。
+   - **Image to Matrix Pipeline**: Input Image -> Crop -> Optional Background Removal -> Resize to 16x16 -> Palette Extraction -> Matrix Mapping -> Manual Cleanup。
+   - **Temporary Character Registration**：支持将当前编辑的草稿一键注册到 `runtimeCharacters.ts`，并自动在 Custom Match Setup 中选中，实现“所见即所得”的即时战斗测试。
+7. **Custom Match Setup**：UI 辅助工具。允许用户在页面上自由选择左右角色（包括固定角色和 `[Temp]` 临时角色）和 Seed，在内存中动态生成临时的 `EpisodeConfig` 并传递给 `app.ts` 的 `restart()` 方法，从而绕过固定的 `episodes.ts` 列表启动战斗。它不参与核心物理/碰撞逻辑。
 
 ## Fixed Episode vs Custom Match
 

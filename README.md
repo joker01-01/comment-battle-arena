@@ -156,9 +156,10 @@ CommentBattleArena/
 3. **手动清理与调色 (Clean & Color)**：在左侧的文本框中修改 16x16 矩阵，清理杂乱像素；在右下角的 Palette Editor 中调整 7 色调色板。如果导入结果很脏，通常是因为图太复杂、主体太小、背景没有去掉或 16x16 尺寸无法保留细节。
 4. **预览动画 (Preview Animation)**：在右上角的下拉框中切换不同动画状态（如 `move`, `attack`, `dash`），实时查看 Transform Keyframes 驱动的动态效果。
 5. **导出定义 (Copy Definition)**：调整满意后，点击 **Copy Definition** 按钮。打开 `src/data/pixelSprites.ts`，将复制的代码粘贴进去，并注册到 `sprites` 对象中。
-6. **生成配置 (Generate Config)**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。点击 **Copy CharacterConfig Draft**，粘贴到 `src/data/characters.ts` 中，并根据需要微调物理属性。
-7. **快速测试 (Custom Match Test)**：刷新页面，在 **Custom Match Setup** 面板的下拉框中直接选择你的新角色，点击 Start Custom Match 立即进行对战测试，**不必先写固定 Episode**。
-8. **导出展示图 (Export README PNG)**：测试满意后，在 Previewer 中使用 **Export Animation Sheet** 导出动作序列图，或通过 `npm run export:readme-sheets` 批量导出，放到 `assets/readme/` 下用于展示。
+6. **生成配置 (Generate Config)**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。
+7. **快速测试 (Register & Test)**：不需要手动写代码！直接点击 **Register Temp Character**，然后点击 **Test In Custom Match**。这会将你的草稿注册到浏览器的内存中，并自动在 Custom Match Setup 面板里选中它。你可以立即开始一场对战测试。
+8. **导出正式代码 (Export Code)**：如果测试满意，点击 **Copy Definition** 和 **Copy CharacterConfig Draft**，将代码分别粘贴到 `src/data/pixelSprites.ts` 和 `src/data/characters.ts` 中永久保存。
+9. **导出展示图 (Export README PNG)**：在 Previewer 中使用 **Export Animation Sheet** 导出动作序列图，或通过 `npm run export:readme-sheets` 批量导出，放到 `assets/readme/` 下用于展示。
 
 ### 关于矩阵解析器 (Matrix Parser)
 

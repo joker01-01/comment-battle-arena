@@ -6,6 +6,8 @@ import { Vector2 } from '../core/vector';
 import { characterTemplates } from '../data/characterTemplates';
 import { generateAnimationSheetDataUrl } from '../utils/animationSheetExporter';
 import { processImageToMatrix } from '../utils/imageToMatrix';
+import { registerRuntimeCharacter } from '../data/runtimeCharacters';
+import { defaultAnimations } from '../rendering/pixelAnimations';
 
 export class PixelSpritePreviewer {
   private overlay!: HTMLDivElement;
@@ -162,6 +164,10 @@ export class PixelSpritePreviewer {
                   </select>
                 </label>
                 <button id="previewer-copy-char-config" style="margin-top: 10px; background: #4aa3ff;">Copy CharacterConfig Draft</button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                  <button id="previewer-register-temp" style="flex: 1; background: #28a745;">Register Temp Character</button>
+                  <button id="previewer-test-temp" style="flex: 1; background: #ffc107; color: #000;">Test In Custom Match</button>
+                </div>
               </div>
             </div>
             <div class="generator-section">
@@ -294,6 +300,25 @@ export class PixelSpritePreviewer {
       navigator.clipboard.writeText(this.getEpisodeConfigString());
       this.errorDiv.textContent = 'Episode Draft copied to clipboard!';
       setTimeout(() => this.errorDiv.textContent = '', 2000);
+    });
+
+    this.overlay.querySelector('#previewer-register-temp')!.addEventListener('click', () => {
+      this.registerTempCharacter();
+    });
+
+    this.overlay.querySelector('#previewer-test-temp')!.addEventListener('click', () => {
+      this.registerTempCharacter();
+      
+      const config = this.getCharacterConfigObject();
+      
+      // Dispatch a custom event so app.ts can update the Custom Match Setup UI
+      const event = new CustomEvent('tempCharacterRegistered', {
+        detail: { characterId: config.id }
+      });
+      window.dispatchEvent(event);
+      
+      this.errorDiv.textContent = 'Registered and selected in Custom Match Setup!';
+      setTimeout(() => this.errorDiv.textContent = '', 3000);
     });
 
     this.overlay.querySelector('#previewer-export-sheet')!.addEventListener('click', () => {
@@ -586,7 +611,7 @@ export class PixelSpritePreviewer {
 };`;
   }
 
-  private getCharacterConfigString(): string {
+  private getCharacterConfigObject(): any {
     const id = (this.overlay.querySelector('#gen-char-id') as HTMLInputElement).value || 'custom_char';
     const name = (this.overlay.querySelector('#gen-char-name') as HTMLInputElement).value || 'Custom Character';
     const desc = (this.overlay.querySelector('#gen-char-desc') as HTMLInputElement).value || '';
@@ -597,30 +622,57 @@ export class PixelSpritePreviewer {
     const template = characterTemplates[styleId];
     const skills = skillId === 'none' ? [] : [skillId];
 
+    return {
+      id: `char_${id}`,
+      name: name,
+      spriteId: id,
+      maxHp: template.maxHp,
+      behaviorType: template.behaviorType,
+      attackDamage: template.attackDamage,
+      attackRange: template.attackRange,
+      attackCooldown: template.attackCooldown,
+      physics: {
+        radius: template.physics.radius,
+        mass: template.physics.mass,
+        restitution: template.physics.restitution,
+        friction: template.physics.friction,
+        baseSpeed: template.physics.baseSpeed,
+        collisionDamage: template.physics.collisionDamage,
+        knockbackResistance: template.physics.knockbackResistance
+      },
+      skills: skills,
+      description: desc,
+      weakness: weak
+    };
+  }
+
+  private getCharacterConfigString(): string {
+    const config = this.getCharacterConfigObject();
+    const id = config.spriteId;
     // Convert snake_case to camelCase for the variable name
-    const varName = id.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+    const varName = id.replace(/_([a-z])/g, (g: string) => g[1].toUpperCase());
 
     return `export const ${varName}Config: CharacterConfig = {
-  id: "char_${id}",
-  name: "${name}",
-  spriteId: "${id}",
-  maxHp: ${template.maxHp},
-  behaviorType: "${template.behaviorType}",
-  attackDamage: ${template.attackDamage},
-  attackRange: ${template.attackRange},
-  attackCooldown: ${template.attackCooldown},
+  id: "${config.id}",
+  name: "${config.name}",
+  spriteId: "${config.spriteId}",
+  maxHp: ${config.maxHp},
+  behaviorType: "${config.behaviorType}",
+  attackDamage: ${config.attackDamage},
+  attackRange: ${config.attackRange},
+  attackCooldown: ${config.attackCooldown},
   physics: {
-    radius: ${template.physics.radius},
-    mass: ${template.physics.mass},
-    restitution: ${template.physics.restitution},
-    friction: ${template.physics.friction},
-    baseSpeed: ${template.physics.baseSpeed},
-    collisionDamage: ${template.physics.collisionDamage},
-    knockbackResistance: ${template.physics.knockbackResistance}
+    radius: ${config.physics.radius},
+    mass: ${config.physics.mass},
+    restitution: ${config.physics.restitution},
+    friction: ${config.physics.friction},
+    baseSpeed: ${config.physics.baseSpeed},
+    collisionDamage: ${config.physics.collisionDamage},
+    knockbackResistance: ${config.physics.knockbackResistance}
   },
-  skills: ${JSON.stringify(skills)},
-  description: "${desc}",
-  weakness: "${weak}"
+  skills: ${JSON.stringify(config.skills)},
+  description: "${config.description}",
+  weakness: "${config.weakness}"
 };`;
   }
 
@@ -641,6 +693,31 @@ export class PixelSpritePreviewer {
   arenaId: "arena_01",
   seed: Math.floor(Math.random() * 1000000)
 }`;
+  }
+
+  private registerTempCharacter() {
+    const config = this.getCharacterConfigObject();
+    
+    // Ensure palette has all 7 colors even if empty
+    const fullPalette: Record<number, string> = { 0: 'transparent' };
+    for (let i = 1; i <= 7; i++) {
+      fullPalette[i] = this.currentPalette[i] || '#000000';
+    }
+
+    const sprite = {
+      id: config.spriteId,
+      width: 16,
+      height: 16,
+      scale: 4,
+      matrix: JSON.parse(JSON.stringify(this.currentMatrix)), // deep copy
+      palette: fullPalette,
+      animations: defaultAnimations
+    };
+
+    registerRuntimeCharacter(config, sprite);
+    
+    this.errorDiv.textContent = 'Temporary character registered.';
+    setTimeout(() => this.errorDiv.textContent = '', 2000);
   }
 
   private exportAnimationSheet() {

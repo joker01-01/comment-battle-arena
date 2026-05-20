@@ -1,4 +1,5 @@
 import type { CharacterConfig } from '../core/types';
+import { getRuntimeCharacterConfigs, runtimeCharacters } from './runtimeCharacters';
 
 export const characters: CharacterConfig[] = [
   {
@@ -142,11 +143,12 @@ export const characters: CharacterConfig[] = [
 ];
 
 export function getCharacterConfig(id: string): CharacterConfig {
+  if (runtimeCharacters[id]) return runtimeCharacters[id];
   const char = characters.find(c => c.id === id);
   if (!char) throw new Error(`Character ${id} not found`);
   return char;
 }
 
 export function getAllCharacterConfigs(): CharacterConfig[] {
-  return characters;
+  return [...characters, ...getRuntimeCharacterConfigs()];
 }

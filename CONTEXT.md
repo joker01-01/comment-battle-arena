@@ -28,7 +28,8 @@
 - **无持续挤压伤害**：持续挤压默认不造成基础伤害，contact damage 未来应作为特定技能实现。
 - **Projectile 定位**：Projectile 只是技能的视觉和伤害表现，不是游戏的核心玩法。
 - **复用动画**：新角色应尽量复用 `defaultAnimations`，只替换静态矩阵。
-- **角色入库流程**：新角色入库优先走 `Previewer (Import Image -> Clean Matrix) -> Copy Sprite Definition -> Copy CharacterConfig Draft -> Custom Match 测试 -> Export Animation Sheet` 完整工作流。
+- **角色入库流程**：新角色入库优先走 `Previewer (Import Image -> Clean Matrix) -> Register Temp Character -> Test In Custom Match -> Copy Sprite Definition -> Copy CharacterConfig Draft` 完整工作流。
+- **Temporary Character**：支持在前端浏览器内存中注册临时角色并立即在 Custom Match 中测试。临时角色和默认固定角色并行存在于下拉框中。临时角色不写入文件系统，刷新页面后丢失。
 - **README 角色展示**：README 中的角色动作序列图可以通过 `npm run export:readme-sheets` 自动生成。该脚本通过 headless browser (Playwright) 复用前端 Pixel Sprite Previewer 的渲染逻辑，不参与战斗核心循环。
 - **图片导入草稿**：Previewer 支持从本地图片生成 16x16 matrix 草稿。Import Image to Matrix v2 支持裁剪主体和背景清理。导入流程中，背景移除（包括白底特判）在 palette 提取之前执行，确保透明像素不占用颜色槽位。该功能仅用于辅助创作，生成结果应人工清理，不保证直接可用，且不参与战斗核心循环。Future Agents 不要把自动导入结果当成最终角色质量标准。
 - **重新定位 Episode 系统**：项目启动不再强依赖 `episodes.ts`。默认进入 Custom Match 模式。`episodes.ts` 仅作为 Published / Saved Match Preset，供 Prev/Next 浏览和正式复现使用。
@@ -106,4 +107,5 @@ src/
 - **不要把自定义对战配置写死到 BattleEngine**。
 - **不要移除固定 Episode 流程**。
 - **不要让 Custom Match 破坏 Prev / Next Episode 按钮逻辑**。
+- **不要让临时角色机制破坏默认角色 registry**。
 

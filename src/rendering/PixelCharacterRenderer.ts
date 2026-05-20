@@ -1,5 +1,6 @@
 import type { CharacterEntity } from '../entities/CharacterEntity';
 import { sprites } from '../data/pixelSprites';
+import { getRuntimeSprite } from '../data/runtimeCharacters';
 
 export type PixelMatrix = number[][];
 
@@ -124,7 +125,7 @@ export class PixelCharacterRenderer {
 
   drawCharacter(ctx: CanvasRenderingContext2D, character: CharacterEntity, engineTime: number) {
     const spriteId = character.config.spriteId || 'shield_cat';
-    const sprite = sprites[spriteId] || sprites.shield_cat;
+    const sprite = getRuntimeSprite(spriteId) || sprites[spriteId] || sprites.shield_cat;
     const state = this.determineAnimationState(character);
     const animation = sprite.animations[state] || sprite.animations.idle;
     

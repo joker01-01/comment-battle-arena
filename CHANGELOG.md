@@ -22,6 +22,7 @@
 - **Export Animation Sheet** 功能，支持在 Previewer 中将角色动作导出为横向 PNG 序列图，用于 README 展示。
 - **Automated README Export Script**，新增 `npm run export:readme-sheets` 命令，自动导出 6 个默认角色的 move 动作序列图至 `assets/readme/`。
 - **Import Image to Matrix v2**，改进了图片导入功能，新增了裁剪主体 (Crop) 和背景清理 (Background Removal) 选项，并修复了白底/浅色背景污染调色板的问题。
+- **Temporary Character Registration**，支持在 Previewer 中将当前编辑的草稿直接注册为临时角色，并在 Custom Match Setup 中立即进行对战测试，无需修改代码或重新编译。
 - **Custom Match Setup** 自由选角面板，支持在页面上直接选择左右角色、输入 Seed 并启动临时对战。
 - **Copy Episode Draft** 功能，支持将 Custom Match 的配置一键复制为代码。
 - 重新定位了 Episode 系统，将其作为 Published/Saved Match Presets。应用现在默认启动进入 Custom Match 模式，移除了对 `episodes.ts` 的启动强依赖。
