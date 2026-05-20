@@ -18,13 +18,14 @@
 - pair-based collision damage cooldown
 - 动量维持机制（Constant Speed Correction）
 - 6 个默认角色（具有不同物理特性和技能）
-- Episode 配置系统
+- Episode 配置系统 (作为 Published / Saved Match Preset)
 - 纯代码像素矩阵角色渲染（16x16 matrix + palette）
 - Transform Keyframes 动画系统（Linear Interpolation + Stepped Time Sampling）
 - 像素风 projectile / effect (spark, heal, reflect)
 - High-DPI (Retina) Canvas 文本渲染支持与 Times New Roman UI 字体
 - Debug collider 可视化
 - 战斗结果统计与复制功能 (Copy Episode Result)
+- **Custom Match Setup** (自由选择左右角色、自定义 Seed 进行临时对战测试)
 - **Pixel Sprite Previewer 开发工具** (支持矩阵解析、动画预览)
 - **CharacterConfig & Episode Draft Generator** (辅助快速生成角色配置代码)
 - **矩阵编辑器的 `textarea` 保持等宽字体 (`monospace`) 以确保编辑时矩阵对齐，其他 UI 统一使用 Times New Roman。**
@@ -73,7 +74,17 @@ CommentBattleArena/
 - **Skill System**：事件驱动的技能系统，角色在特定时机（如 `onTick`, `onAttack`, `onDamageTaken`）触发注册的技能逻辑。
 - **PixelCharacterRenderer**：负责将 16x16 的数字矩阵结合调色板渲染到 Canvas 上，并处理像素对齐。
 - **Transform Keyframes**：动画系统，通过对极值点进行线性插值并按固定低帧率（如 8fps）阶梯化采样，实现复古像素动画。
-- **Episode System**：定义每期对战的双方角色、等级、队伍配置，引擎根据 Episode 初始化战斗。
+- **Episode System**：作为 Published / Saved Match Preset，定义每期对战的双方角色、等级、队伍配置，用于正式发布和复现。
+
+## 如何自由选择左右角色并启动自定义对战
+
+在页面控制区下方有一个 **Custom Match Setup** 面板：
+
+1. 在 **Left Character** 和 **Right Character** 下拉框中选择你想测试的角色（支持同角色内战）。
+2. （可选）输入一个整数作为 **Seed**，如果不填则自动生成随机 Seed。
+3. 点击 **Start Custom Match** 按钮即可立即启动这场临时对战。
+4. 如果觉得这场对战很有趣，可以点击 **Copy Episode Draft**，将生成的配置代码粘贴到 `src/data/episodes.ts` 中永久保存。
+5. 点击顶部的 **Prev Episode** 或 **Next Episode** 按钮，可以随时切回代码中固定的 Episode 剧本流程。
 
 ## 如何新增角色 (从 Previewer 到新角色入库)
 
@@ -83,9 +94,9 @@ CommentBattleArena/
 4. **复制 Sprite 定义**：调整满意后，点击 **Copy Definition** 按钮。打开 `src/data/pixelSprites.ts`，将复制的代码粘贴进去，并注册到 `sprites` 对象中。
 5. **生成 CharacterConfig 草稿**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。点击 **Copy CharacterConfig Draft**。
 6. **配置属性**：打开 `src/data/characters.ts`，粘贴刚刚生成的配置代码，并根据需要微调物理属性。
-7. **生成 Episode 草稿**：在 Previewer 中选择对手和站位，点击 **Copy Episode Draft**。
-8. **创建对战**：打开 `src/data/episodes.ts`，将生成的 Episode 配置粘贴到 `episodes` 数组中。
-9. **运行验证**：`npm run dev` 查看效果。
+7. **快速测试**：新角色加入 `characters.ts` 后，刷新页面，即可在 **Custom Match Setup** 面板的下拉框中选择该角色进行快速测试，**不必先写固定 Episode**。
+8. **生成 Episode 草稿**：测试满意后，可以在 Custom Match Setup 中点击 **Copy Episode Draft**，或者在 Previewer 中生成。
+9. **创建对战**：打开 `src/data/episodes.ts`，将生成的 Episode 配置粘贴到 `episodes` 数组中。
 
 ### 关于矩阵解析器 (Matrix Parser)
 

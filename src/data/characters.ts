@@ -146,3 +146,7 @@ export function getCharacterConfig(id: string): CharacterConfig {
   if (!char) throw new Error(`Character ${id} not found`);
   return char;
 }
+
+export function getAllCharacterConfigs(): CharacterConfig[] {
+  return characters;
+}

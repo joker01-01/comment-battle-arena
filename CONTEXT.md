@@ -3,12 +3,13 @@
 ## Project Snapshot
 
 **Date**: 2026-05-20
-**Current Stage**: MVP 已经具备像素角色、圆形刚体物理、自动对战、Transform Keyframes 动画和基础技能效果。基础架构和数据层（如 `pixelSprites.ts`）已拆分完毕。Pixel Sprite Previewer 已经完成，并集成了 CharacterConfig 和 Episode 草稿生成器，角色生产工具链进入可用阶段。
+**Current Stage**: MVP 已经具备像素角色、圆形刚体物理、自动对战、Transform Keyframes 动画和基础技能效果。基础架构和数据层（如 `pixelSprites.ts`）已拆分完毕。Pixel Sprite Previewer 已经完成，并集成了 CharacterConfig 和 Episode 草稿生成器，角色生产工具链进入可用阶段。已加入 Custom Match Setup 自由选角功能。
 
 ## Core Product Idea
 
 - **开源像素风自动物理对战模拟器**：用于短视频连载和社区互动。
-- **Episode 驱动**：每期视频是一个 Episode，配置不同的角色对战。
+- **Custom Match 优先**：开发、测试和创作的主要入口是自由选角的 Custom Match。
+- **Episode 归档**：每期发布的视频作为一个 Episode Preset 保存，用于正式发布和复现。
 - **社区共创**：角色可以由评论区投稿，通过配置化快速生产。
 - **不是弹球游戏**：虽然有物理碰撞，但核心是角色之间的战斗，不是打砖块或打球。
 - **圆形刚体**：角色本身是圆形刚体，通过碰撞和冲量交互。
@@ -27,7 +28,8 @@
 - **无持续挤压伤害**：持续挤压默认不造成基础伤害，contact damage 未来应作为特定技能实现。
 - **Projectile 定位**：Projectile 只是技能的视觉和伤害表现，不是游戏的核心玩法。
 - **复用动画**：新角色应尽量复用 `defaultAnimations`，只替换静态矩阵。
-- **角色入库流程**：新角色入库优先走 `Previewer -> Copy Sprite Definition -> Copy CharacterConfig Draft -> Copy Episode Draft` 工作流。
+- **角色入库流程**：新角色入库优先走 `Previewer -> Copy Sprite Definition -> Copy CharacterConfig Draft -> Custom Match 测试 -> Copy Episode Draft` 工作流。
+- **重新定位 Episode 系统**：项目启动不再强依赖 `episodes.ts`。默认进入 Custom Match 模式。`episodes.ts` 仅作为 Published / Saved Match Preset，供 Prev/Next 浏览和正式复现使用。
 
 ## Current Architecture
 
@@ -99,4 +101,7 @@ src/
 - **不要让 palette 颜色值污染 matrix 解析**。
 - **新增 sprite 时优先使用 Previewer + pixelSprites.ts 工作流**。
 - **不要让生成器输出与 CharacterConfig 类型不匹配的代码**。
+- **不要把自定义对战配置写死到 BattleEngine**。
+- **不要移除固定 Episode 流程**。
+- **不要让 Custom Match 破坏 Prev / Next Episode 按钮逻辑**。
 

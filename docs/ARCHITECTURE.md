@@ -49,6 +49,12 @@ CommentBattleArena/
 4. **Skill System**：解耦的事件响应。AI 决定“何时”触发，Skill 决定“发生什么”。技能可以修改实体状态、生成 Projectile 或 Effect。
 5. **PixelCharacterRenderer**：视觉欺骗。它不关心圆有多大，只负责在 `character.pos` 的位置，根据当前状态播放对应的 Transform Keyframes 动画，并严格对齐到逻辑像素网格。
 6. **Pixel Sprite Previewer**：开发辅助工具。不参与战斗核心循环，但完全复用 `PixelCharacterRenderer` 的渲染逻辑、`pixelSprites.ts` 的数据和 `defaultAnimations`。用于快速编辑 16x16 矩阵和调色板，并生成可复制的 Sprite Definition 代码。同时内置了 **CharacterConfig Generator** 和 **Episode Generator**，结合 `characterTemplates.ts` 提供战斗风格预设，大幅加速新角色入库流程。
+7. **Custom Match Setup**：UI 辅助工具。允许用户在页面上自由选择左右角色和 Seed，在内存中动态生成临时的 `EpisodeConfig` 并传递给 `app.ts` 的 `restart()` 方法，从而绕过固定的 `episodes.ts` 列表启动战斗。它不参与核心物理/碰撞逻辑。
+
+## Fixed Episode vs Custom Match
+
+- **Custom Match Mode**：**当前默认模式与主要入口**。应用启动时会读取 Custom Match Setup UI 的默认值并在内存中动态生成 `EpisodeConfig` 初始化 `BattleEngine`。用于日常测试、角色创作和自由对战。
+- **Fixed Episode Mode** (Saved Presets)：归档模式。`app.ts` 根据 `currentEpisodeIndex` 从 `src/data/episodes.ts` 中读取硬编码的剧本。点击 Prev/Next Preset 按钮会进入此模式，用于浏览已发布的正式对战。
 
 ## 一帧战斗循环 (Game Loop)
 

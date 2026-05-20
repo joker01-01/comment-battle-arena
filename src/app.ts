@@ -1,8 +1,9 @@
 import { BattleEngine } from './core/BattleEngine';
 import { Renderer } from './core/Renderer';
 import { CharacterEntity } from './entities/CharacterEntity';
-import { getCharacterConfig } from './data/characters';
+import { getCharacterConfig, getAllCharacterConfigs } from './data/characters';
 import { episodes } from './data/episodes';
+import type { EpisodeConfig } from './core/types';
 import { Vector2 } from './core/vector';
 
 import { PixelSpritePreviewer } from './ui/PixelSpritePreviewer';
@@ -14,6 +15,8 @@ export class App {
   private previewer: PixelSpritePreviewer;
   
   private currentEpisodeIndex: number = 0;
+  private isCustomMatch: boolean = false;
+  private customEpisodeConfig: EpisodeConfig | null = null;
   private isPaused: boolean = false;
   private lastTime: number = 0;
   private reqId: number = 0;
@@ -43,8 +46,40 @@ export class App {
     this.previewer = new PixelSpritePreviewer();
 
     this.setupCanvas();
+    this.setupCustomMatchUI();
     this.bindEvents();
-    this.loadEpisode(0);
+    this.startMatchFromSetupUI();
+  }
+
+  private setupCustomMatchUI() {
+    const leftSelect = document.getElementById('setupLeftChar') as HTMLSelectElement;
+    const rightSelect = document.getElementById('setupRightChar') as HTMLSelectElement;
+    
+    const chars = getAllCharacterConfigs();
+    let optionsHtml = '';
+    for (const c of chars) {
+      optionsHtml += `<option value="${c.id}">${c.name}</option>`;
+    }
+    
+    leftSelect.innerHTML = optionsHtml;
+    rightSelect.innerHTML = optionsHtml;
+
+    // Set defaults if available
+    if (chars.length >= 2) {
+      leftSelect.value = chars[0].id;
+      rightSelect.value = chars[1].id;
+    }
+
+    const titleInput = document.getElementById('setupTitle') as HTMLInputElement;
+    const updateTitle = () => {
+      const leftName = leftSelect.options[leftSelect.selectedIndex]?.text || 'Left';
+      const rightName = rightSelect.options[rightSelect.selectedIndex]?.text || 'Right';
+      titleInput.value = `${leftName} vs ${rightName}`;
+    };
+
+    leftSelect.addEventListener('change', updateTitle);
+    rightSelect.addEventListener('change', updateTitle);
+    updateTitle();
   }
 
   private setupCanvas() {
@@ -72,6 +107,41 @@ export class App {
     document.getElementById('btnToggleDebug')!.addEventListener('click', () => this.toggleDebug());
     document.getElementById('btnOpenPreviewer')!.addEventListener('click', () => this.previewer.open());
 
+    document.getElementById('btnSwapChars')!.addEventListener('click', () => {
+      const leftSelect = document.getElementById('setupLeftChar') as HTMLSelectElement;
+      const rightSelect = document.getElementById('setupRightChar') as HTMLSelectElement;
+      const temp = leftSelect.value;
+      leftSelect.value = rightSelect.value;
+      rightSelect.value = temp;
+      
+      // trigger change to update title
+      leftSelect.dispatchEvent(new Event('change'));
+    });
+
+    document.getElementById('btnStartCustomMatch')!.addEventListener('click', () => this.startMatchFromSetupUI());
+
+    document.getElementById('btnCopyDraft')!.addEventListener('click', () => {
+      const leftId = (document.getElementById('setupLeftChar') as HTMLSelectElement).value;
+      const rightId = (document.getElementById('setupRightChar') as HTMLSelectElement).value;
+      const seedInput = (document.getElementById('setupSeed') as HTMLInputElement).value;
+      const titleInput = (document.getElementById('setupTitle') as HTMLInputElement).value;
+
+      let seed = parseInt(seedInput);
+      if (isNaN(seed)) seed = Math.floor(Math.random() * 1000000);
+
+      const draft = `{
+  episodeId: "EP_CUSTOM",
+  title: "${titleInput || 'Custom Match'}",
+  leftCharacterId: "${leftId}",
+  rightCharacterId: "${rightId}",
+  arenaId: "arena_1",
+  seed: ${seed}
+}`;
+      navigator.clipboard.writeText(draft).then(() => {
+        alert('Episode draft copied.');
+      });
+    });
+
     window.addEventListener('battleLog', (e: any) => {
       const div = document.createElement('div');
       div.className = 'log-entry';
@@ -81,9 +151,43 @@ export class App {
     });
   }
 
+  private startMatchFromSetupUI() {
+    const leftId = (document.getElementById('setupLeftChar') as HTMLSelectElement).value;
+    const rightId = (document.getElementById('setupRightChar') as HTMLSelectElement).value;
+    const seedInput = (document.getElementById('setupSeed') as HTMLInputElement).value;
+    const titleInput = (document.getElementById('setupTitle') as HTMLInputElement).value;
+
+    let seed = parseInt(seedInput);
+    if (isNaN(seed)) {
+      seed = Math.floor(Math.random() * 1000000);
+      (document.getElementById('setupSeed') as HTMLInputElement).value = seed.toString();
+    }
+
+    const customEp: EpisodeConfig = {
+      episodeId: 'CUSTOM',
+      title: titleInput || 'Custom Match',
+      leftCharacterId: leftId,
+      rightCharacterId: rightId,
+      arenaId: 'arena_1',
+      seed: seed
+    };
+
+    this.startCustomEpisode(customEp);
+  }
+
   private loadEpisode(index: number) {
     if (index < 0 || index >= episodes.length) return;
     this.currentEpisodeIndex = index;
+    this.isCustomMatch = false;
+    this.customEpisodeConfig = null;
+    document.getElementById('setupModeDisplay')!.textContent = 'Mode: Fixed Episode';
+    this.restart();
+  }
+
+  private startCustomEpisode(customEp: EpisodeConfig) {
+    this.isCustomMatch = true;
+    this.customEpisodeConfig = customEp;
+    document.getElementById('setupModeDisplay')!.textContent = 'Mode: Custom Match';
     this.restart();
   }
 
@@ -92,23 +196,34 @@ export class App {
     this.logEl.innerHTML = '';
     this.resultOverlay.classList.add('hidden');
     
-    const ep = episodes[this.currentEpisodeIndex];
+    let ep: EpisodeConfig;
+    if (this.isCustomMatch && this.customEpisodeConfig) {
+      ep = this.customEpisodeConfig;
+    } else {
+      ep = episodes[this.currentEpisodeIndex];
+    }
+
     this.titleEl.textContent = `${ep.episodeId}: ${ep.title}`;
     this.seedEl.textContent = `Seed: ${ep.seed}`;
 
     this.engine = new BattleEngine(ep);
     this.engine.renderer = this.renderer;
     
-    const leftConfig = getCharacterConfig(ep.leftCharacterId);
-    const rightConfig = getCharacterConfig(ep.rightCharacterId);
+    try {
+      const leftConfig = getCharacterConfig(ep.leftCharacterId);
+      const rightConfig = getCharacterConfig(ep.rightCharacterId);
 
-    const leftChar = new CharacterEntity(leftConfig.id + '_L', new Vector2(150, 450 / 2), leftConfig, 'left');
-    const rightChar = new CharacterEntity(rightConfig.id + '_R', new Vector2(800 - 150, 450 / 2), rightConfig, 'right');
+      const leftChar = new CharacterEntity(leftConfig.id + '_L', new Vector2(150, 450 / 2), leftConfig, 'left');
+      const rightChar = new CharacterEntity(rightConfig.id + '_R', new Vector2(800 - 150, 450 / 2), rightConfig, 'right');
 
-    this.updateCharInfo('leftInfo', leftConfig);
-    this.updateCharInfo('rightInfo', rightConfig);
+      this.updateCharInfo('leftInfo', leftConfig);
+      this.updateCharInfo('rightInfo', rightConfig);
 
-    this.engine.init(leftChar, rightChar);
+      this.engine.init(leftChar, rightChar);
+    } catch (e: any) {
+      alert(`Error initializing battle: ${e.message}`);
+      return;
+    }
     
     this.isPaused = false;
     document.getElementById('btnStart')!.textContent = 'Pause';
