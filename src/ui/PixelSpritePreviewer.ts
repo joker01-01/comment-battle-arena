@@ -98,10 +98,13 @@ export class PixelSpritePreviewer {
 
                   <div class="bg-removal-controls" style="margin-top: 5px;">
                     <label><input type="checkbox" id="import-remove-bg" checked> Remove Background</label>
-                    <label>Color: <input type="color" id="import-bg-color" value="#ffffff"></label>
                     <label>Tolerance: <input type="number" id="import-bg-tol" value="50" min="0" max="255" style="width: 50px;"></label>
-                    <button id="import-pick-bg">Pick Top-Left</button>
-                    <label style="width: 100%;"><input type="checkbox" id="import-near-white" checked> Treat Near-White (RGB > 240) as Transparent</label>
+                    <div style="width: 100%; display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                      <span style="font-size: 12px; color: #aaa;">Colors to remove (click image to pick):</span>
+                      <div id="import-bg-color-badges" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                      <button id="import-clear-bg-colors" style="font-size: 11px; padding: 2px 5px;">Clear</button>
+                    </div>
+                    <label style="width: 100%; margin-top: 5px;"><input type="checkbox" id="import-near-white" checked> Treat Near-White (RGB > 240) as Transparent</label>
                     <label style="width: 100%;">Alpha Thresh: <input type="number" id="import-alpha-thresh" value="128" min="0" max="255" style="width: 50px;"></label>
                   </div>
 
@@ -309,6 +312,46 @@ export class PixelSpritePreviewer {
     const cropYInput = this.overlay.querySelector('#import-crop-y') as HTMLInputElement;
     const cropSizeInput = this.overlay.querySelector('#import-crop-size') as HTMLInputElement;
     
+    let selectedBgColors: string[] = [];
+
+    const renderBgColorBadges = () => {
+      const container = this.overlay.querySelector('#import-bg-color-badges') as HTMLDivElement;
+      container.innerHTML = selectedBgColors.map(hex => 
+        `<div class="bg-color-badge" style="background-color: ${hex}; width: 16px; height: 16px; border: 1px solid #888; border-radius: 2px; cursor: pointer;" title="Click to remove" data-color="${hex}"></div>`
+      ).join('');
+      
+      container.querySelectorAll('.bg-color-badge').forEach(badge => {
+        badge.addEventListener('click', (e) => {
+          const color = (e.target as HTMLDivElement).dataset.color!;
+          selectedBgColors = selectedBgColors.filter(c => c !== color);
+          renderBgColorBadges();
+        });
+      });
+    };
+
+    this.overlay.querySelector('#import-clear-bg-colors')!.addEventListener('click', () => {
+      selectedBgColors = [];
+      renderBgColorBadges();
+    });
+
+    previewCanvas.addEventListener('click', (e) => {
+      if (!currentImportImage) return;
+      const rect = previewCanvas.getBoundingClientRect();
+      const scaleX = previewCanvas.width / rect.width;
+      const scaleY = previewCanvas.height / rect.height;
+      const x = Math.floor((e.clientX - rect.left) * scaleX);
+      const y = Math.floor((e.clientY - rect.top) * scaleY);
+      
+      const ctx = previewCanvas.getContext('2d')!;
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      const hex = '#' + [pixel[0], pixel[1], pixel[2]].map(c => c.toString(16).padStart(2, '0')).join('');
+      
+      if (!selectedBgColors.includes(hex)) {
+        selectedBgColors.push(hex);
+        renderBgColorBadges();
+      }
+    });
+
     const updateCropBox = () => {
       if (!currentImportImage) return;
       const scale = previewCanvas.clientWidth / previewCanvas.width;
@@ -348,7 +391,8 @@ export class PixelSpritePreviewer {
           // Auto-pick top-left color
           const pixel = ctx.getImageData(0, 0, 1, 1).data;
           const hex = '#' + [pixel[0], pixel[1], pixel[2]].map(x => x.toString(16).padStart(2, '0')).join('');
-          (this.overlay.querySelector('#import-bg-color') as HTMLInputElement).value = hex;
+          selectedBgColors = [hex];
+          renderBgColorBadges();
 
           updateCropBox();
         };
@@ -370,14 +414,6 @@ export class PixelSpritePreviewer {
       input.addEventListener('input', updateCropBox);
     });
 
-    this.overlay.querySelector('#import-pick-bg')!.addEventListener('click', () => {
-      if (!currentImportImage) return;
-      const ctx = previewCanvas.getContext('2d')!;
-      const pixel = ctx.getImageData(0, 0, 1, 1).data;
-      const hex = '#' + [pixel[0], pixel[1], pixel[2]].map(x => x.toString(16).padStart(2, '0')).join('');
-      (this.overlay.querySelector('#import-bg-color') as HTMLInputElement).value = hex;
-    });
-
     const runImportProcess = async () => {
       if (!currentImportImage) return null;
       
@@ -386,7 +422,7 @@ export class PixelSpritePreviewer {
         cropY: parseInt(cropYInput.value),
         cropSize: parseInt(cropSizeInput.value),
         removeBackground: (this.overlay.querySelector('#import-remove-bg') as HTMLInputElement).checked,
-        backgroundColor: (this.overlay.querySelector('#import-bg-color') as HTMLInputElement).value,
+        backgroundColors: selectedBgColors,
         bgTolerance: parseInt((this.overlay.querySelector('#import-bg-tol') as HTMLInputElement).value),
         treatNearWhiteAsTransparent: (this.overlay.querySelector('#import-near-white') as HTMLInputElement).checked,
         alphaThreshold: parseInt((this.overlay.querySelector('#import-alpha-thresh') as HTMLInputElement).value),

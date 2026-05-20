@@ -3,7 +3,7 @@ export interface ImageProcessingOptions {
   cropY: number;
   cropSize: number;
   removeBackground: boolean;
-  backgroundColor: string; // hex
+  backgroundColors: string[]; // array of hex colors
   bgTolerance: number;
   treatNearWhiteAsTransparent: boolean;
   alphaThreshold: number;
@@ -30,7 +30,9 @@ export function applyTransparencyRules(canvas: HTMLCanvasElement, options: Image
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
   
-  const bgRgb = options.removeBackground ? hexToRgb(options.backgroundColor) : null;
+  const bgRgbs = options.removeBackground && options.backgroundColors 
+    ? options.backgroundColors.map(hexToRgb).filter(c => c !== null) as {r:number, g:number, b:number}[]
+    : [];
 
   for (let i = 0; i < data.length; i += 4) {
     const r = data[i];
@@ -47,10 +49,13 @@ export function applyTransparencyRules(canvas: HTMLCanvasElement, options: Image
       }
       
       // 2. Background color check
-      if (!makeTransparent && bgRgb && options.removeBackground) {
-        const dist = colorDistance(r, g, b, bgRgb.r, bgRgb.g, bgRgb.b);
-        if (dist <= options.bgTolerance) {
-          makeTransparent = true;
+      if (!makeTransparent && options.removeBackground) {
+        for (const bgRgb of bgRgbs) {
+          const dist = colorDistance(r, g, b, bgRgb.r, bgRgb.g, bgRgb.b);
+          if (dist <= options.bgTolerance) {
+            makeTransparent = true;
+            break;
+          }
         }
       }
 
