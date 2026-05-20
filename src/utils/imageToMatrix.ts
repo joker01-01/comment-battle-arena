@@ -5,6 +5,8 @@ export interface ImageProcessingOptions {
   removeBackground: boolean;
   backgroundColor: string; // hex
   bgTolerance: number;
+  treatNearWhiteAsTransparent: boolean;
+  alphaThreshold: number;
   colorCount: number;
   smoothing: boolean;
 }
@@ -23,13 +25,12 @@ export function cropImageToSquare(img: HTMLImageElement | HTMLCanvasElement, x: 
   return canvas;
 }
 
-export function removeBackgroundByColor(canvas: HTMLCanvasElement, bgColorHex: string, tolerance: number): HTMLCanvasElement {
+export function applyTransparencyRules(canvas: HTMLCanvasElement, options: ImageProcessingOptions): HTMLCanvasElement {
   const ctx = canvas.getContext('2d')!;
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
   
-  const bgRgb = hexToRgb(bgColorHex);
-  if (!bgRgb) return canvas;
+  const bgRgb = options.removeBackground ? hexToRgb(options.backgroundColor) : null;
 
   for (let i = 0; i < data.length; i += 4) {
     const r = data[i];
@@ -38,8 +39,22 @@ export function removeBackgroundByColor(canvas: HTMLCanvasElement, bgColorHex: s
     const a = data[i + 3];
     
     if (a > 0) {
-      const dist = colorDistance(r, g, b, bgRgb.r, bgRgb.g, bgRgb.b);
-      if (dist <= tolerance) {
+      let makeTransparent = false;
+
+      // 1. Near-white check (R > 240 && G > 240 && B > 240)
+      if (options.treatNearWhiteAsTransparent && r > 240 && g > 240 && b > 240) {
+        makeTransparent = true;
+      }
+      
+      // 2. Background color check
+      if (!makeTransparent && bgRgb && options.removeBackground) {
+        const dist = colorDistance(r, g, b, bgRgb.r, bgRgb.g, bgRgb.b);
+        if (dist <= options.bgTolerance) {
+          makeTransparent = true;
+        }
+      }
+
+      if (makeTransparent) {
         data[i + 3] = 0; // Set alpha to 0
       }
     }
@@ -58,7 +73,7 @@ export function resizeTo16x16(canvas: HTMLCanvasElement, smoothing: boolean): HT
   return targetCanvas;
 }
 
-export function extractPalette(canvas: HTMLCanvasElement, colorCount: number): string[] {
+export function extractPalette(canvas: HTMLCanvasElement, colorCount: number, alphaThreshold: number): string[] {
   const ctx = canvas.getContext('2d')!;
   const imageData = ctx.getImageData(0, 0, 16, 16);
   const data = imageData.data;
@@ -71,7 +86,7 @@ export function extractPalette(canvas: HTMLCanvasElement, colorCount: number): s
     const b = data[i + 2];
     const a = data[i + 3];
 
-    if (a < 128) continue; // Ignore transparent or highly translucent pixels
+    if (a < alphaThreshold) continue; // Ignore transparent or highly translucent pixels
 
     // Quantize slightly to group similar colors before counting
     const qR = Math.round(r / 16) * 16;
@@ -91,7 +106,7 @@ export function extractPalette(canvas: HTMLCanvasElement, colorCount: number): s
   return sortedColors.slice(0, Math.min(colorCount, 7));
 }
 
-export function mapPixelsToMatrix(canvas: HTMLCanvasElement, paletteColors: string[]): ImageToMatrixResult {
+export function mapPixelsToMatrix(canvas: HTMLCanvasElement, paletteColors: string[], alphaThreshold: number): ImageToMatrixResult {
   const ctx = canvas.getContext('2d')!;
   const imageData = ctx.getImageData(0, 0, 16, 16);
   const data = imageData.data;
@@ -111,7 +126,7 @@ export function mapPixelsToMatrix(canvas: HTMLCanvasElement, paletteColors: stri
       const b = data[i + 2];
       const a = data[i + 3];
 
-      if (a < 128) {
+      if (a < alphaThreshold) {
         row.push(0);
       } else {
         let closestIndex = 1;
@@ -141,19 +156,17 @@ export async function processImageToMatrix(img: HTMLImageElement, options: Image
   // 1. Crop
   let canvas = cropImageToSquare(img, options.cropX, options.cropY, options.cropSize);
   
-  // 2. Remove Background
-  if (options.removeBackground) {
-    canvas = removeBackgroundByColor(canvas, options.backgroundColor, options.bgTolerance);
-  }
+  // 2. Apply Transparency Rules (Background Removal & Near-White)
+  canvas = applyTransparencyRules(canvas, options);
   
   // 3. Resize to 16x16
   canvas = resizeTo16x16(canvas, options.smoothing);
   
   // 4. Extract Palette
-  const paletteColors = extractPalette(canvas, options.colorCount);
+  const paletteColors = extractPalette(canvas, options.colorCount, options.alphaThreshold);
   
   // 5. Map Pixels to Matrix
-  return mapPixelsToMatrix(canvas, paletteColors);
+  return mapPixelsToMatrix(canvas, paletteColors, options.alphaThreshold);
 }
 
 // Helpers

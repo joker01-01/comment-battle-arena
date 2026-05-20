@@ -97,10 +97,12 @@ export class PixelSpritePreviewer {
                   </div>
 
                   <div class="bg-removal-controls" style="margin-top: 5px;">
-                    <label><input type="checkbox" id="import-remove-bg"> Remove Background</label>
+                    <label><input type="checkbox" id="import-remove-bg" checked> Remove Background</label>
                     <label>Color: <input type="color" id="import-bg-color" value="#ffffff"></label>
-                    <label>Tolerance: <input type="number" id="import-bg-tol" value="40" min="0" max="255" style="width: 50px;"></label>
+                    <label>Tolerance: <input type="number" id="import-bg-tol" value="50" min="0" max="255" style="width: 50px;"></label>
                     <button id="import-pick-bg">Pick Top-Left</button>
+                    <label style="width: 100%;"><input type="checkbox" id="import-near-white" checked> Treat Near-White (RGB > 240) as Transparent</label>
+                    <label style="width: 100%;">Alpha Thresh: <input type="number" id="import-alpha-thresh" value="128" min="0" max="255" style="width: 50px;"></label>
                   </div>
 
                   <div class="palette-controls" style="margin-top: 5px;">
@@ -343,6 +345,11 @@ export class PixelSpritePreviewer {
           cropYInput.value = Math.floor((img.height - size) / 2).toString();
           cropSizeInput.value = size.toString();
           
+          // Auto-pick top-left color
+          const pixel = ctx.getImageData(0, 0, 1, 1).data;
+          const hex = '#' + [pixel[0], pixel[1], pixel[2]].map(x => x.toString(16).padStart(2, '0')).join('');
+          (this.overlay.querySelector('#import-bg-color') as HTMLInputElement).value = hex;
+
           updateCropBox();
         };
         img.src = event.target?.result as string;
@@ -381,6 +388,8 @@ export class PixelSpritePreviewer {
         removeBackground: (this.overlay.querySelector('#import-remove-bg') as HTMLInputElement).checked,
         backgroundColor: (this.overlay.querySelector('#import-bg-color') as HTMLInputElement).value,
         bgTolerance: parseInt((this.overlay.querySelector('#import-bg-tol') as HTMLInputElement).value),
+        treatNearWhiteAsTransparent: (this.overlay.querySelector('#import-near-white') as HTMLInputElement).checked,
+        alphaThreshold: parseInt((this.overlay.querySelector('#import-alpha-thresh') as HTMLInputElement).value),
         colorCount: parseInt((this.overlay.querySelector('#import-color-count') as HTMLInputElement).value),
         smoothing: (this.overlay.querySelector('#import-smooth') as HTMLInputElement).checked
       };

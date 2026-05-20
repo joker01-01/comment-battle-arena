@@ -151,7 +151,7 @@ CommentBattleArena/
 1. **打开预览器 (Open Previewer)**：点击页面底部的 **Open Pixel Sprite Previewer** 按钮。
 2. **导入参考图 (Import Image)**：在左侧 **Import Image to Matrix v2** 区域，选择一张本地图片（如 PNG/JPG）。
    - **裁剪主体 (Crop)**：调整 Crop X/Y/Size，确保只框选角色主体。
-   - **移除背景 (Remove Background)**：勾选 Remove Background，使用 Pick Top-Left 提取背景色，调整 Tolerance。
+   - **移除背景 (Remove Background)**：勾选 Remove Background，默认会自动提取左上角颜色作为背景色并透明化。白底或浅色背景会自动优先转为透明（Treat Near-White as Transparent），避免污染角色调色板。
    - **生成草稿 (Preview & Apply)**：点击 Preview Result，满意后点击 Apply to Matrix。导入结果只是草稿，不建议直接当最终角色。
 3. **手动清理与调色 (Clean & Color)**：在左侧的文本框中修改 16x16 矩阵，清理杂乱像素；在右下角的 Palette Editor 中调整 7 色调色板。如果导入结果很脏，通常是因为图太复杂、主体太小、背景没有去掉或 16x16 尺寸无法保留细节。
 4. **预览动画 (Preview Animation)**：在右上角的下拉框中切换不同动画状态（如 `move`, `attack`, `dash`），实时查看 Transform Keyframes 驱动的动态效果。
