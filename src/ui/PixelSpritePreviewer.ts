@@ -100,7 +100,7 @@ export class PixelSpritePreviewer {
                     <label><input type="checkbox" id="import-remove-bg" checked> Remove Background</label>
                     <label>Tolerance: <input type="number" id="import-bg-tol" value="50" min="0" max="255" style="width: 50px;"></label>
                     <div style="width: 100%; display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                      <span style="font-size: 12px; color: #aaa;">Colors to remove (click image to pick):</span>
+                      <span style="font-size: 12px; color: #aaa;">Colors to remove (click left or right image to pick):</span>
                       <div id="import-bg-color-badges" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
                       <button id="import-clear-bg-colors" style="font-size: 11px; padding: 2px 5px;">Clear</button>
                     </div>
@@ -477,6 +477,40 @@ export class PixelSpritePreviewer {
         this.errorDiv.textContent = 'Image applied to matrix successfully.';
         setTimeout(() => this.errorDiv.textContent = '', 3000);
         importResultDraft = null;
+      }
+    });
+
+    this.canvas.addEventListener('click', async (e) => {
+      if (!currentImportImage) return;
+      
+      const rect = this.canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const x = Math.floor((e.clientX - rect.left) * dpr);
+      const y = Math.floor((e.clientY - rect.top) * dpr);
+      
+      const pixel = this.ctx.getImageData(x, y, 1, 1).data;
+      if (pixel[3] === 0) return; // Ignore transparent pixels
+      
+      const hex = '#' + [pixel[0], pixel[1], pixel[2]].map(c => c.toString(16).padStart(2, '0')).join('');
+      
+      if (!selectedBgColors.includes(hex)) {
+        selectedBgColors.push(hex);
+        renderBgColorBadges();
+        
+        // Auto-trigger preview update for better UX
+        const result = await runImportProcess();
+        if (result) {
+          importResultDraft = result;
+          const tempMatrix = this.currentMatrix;
+          const tempPalette = this.currentPalette;
+          
+          this.currentMatrix = result.matrix;
+          this.currentPalette = result.palette;
+          this.updateMockSprite();
+          
+          this.currentMatrix = tempMatrix;
+          this.currentPalette = tempPalette;
+        }
       }
     });
   }
