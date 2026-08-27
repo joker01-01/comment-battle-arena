@@ -1,3 +1,11 @@
+<p>
+  <a href="#english"><kbd>&nbsp;English&nbsp;</kbd></a>
+  &nbsp;
+  <a href="#zhong-wen"><kbd>&nbsp;中文&nbsp;</kbd></a>
+</p>
+
+<a id="english"></a>
+
 # Comment Battle Arena
 
 Configurable pixel battle simulator with deterministic physics, skills, and creator tooling.
@@ -5,6 +13,42 @@ Configurable pixel battle simulator with deterministic physics, skills, and crea
 TypeScript · Canvas · seeded LCG randomness · Vitest · character/episode tooling
 
 This is general software engineering, not an AI product. It sits beside the AI Agent line of work to show physics, tooling, and tests.
+
+## What it is
+
+- Not a player-controlled fighting game
+- Not a pinball game — characters themselves are circular rigid bodies
+- Configured episodes play out automatically
+- Community-submitted characters are a future idea, not implemented
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+npm run build
+npx vitest run
+```
+
+Tests live in `tests/` (`physics.test.ts`, `physics2.test.ts`, `damage.test.ts`). There is no CI.
+
+Animation sheets for the README are generated with `npm run export:readme-sheets` and are **not** committed yet (`assets/readme/` only has `.keep`).
+
+Full character-creation workflow, matrix spec, and episode tooling: jump to [中文](#zhong-wen).
+
+---
+
+<a id="zhong-wen"></a>
+
+# 中文
+
+<p>
+  <a href="#english"><kbd>&nbsp;English&nbsp;</kbd></a>
+  &nbsp;
+  <a href="#zhong-wen"><kbd>&nbsp;中文&nbsp;</kbd></a>
+</p>
+
+# Comment Battle Arena
 
 一个开源的像素风角色物理自动对战模拟器。角色视觉上是 16x16 像素小人，底层使用圆形刚体碰撞，在封闭竞技场中自动移动、冲撞、反弹、释放技能。项目用于短视频连载和评论区共创角色。
 
