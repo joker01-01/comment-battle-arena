@@ -1,5 +1,11 @@
 # Comment Battle Arena
 
+Configurable pixel battle simulator with deterministic physics, skills, and creator tooling.
+
+TypeScript · Canvas · seeded LCG randomness · Vitest · character/episode tooling
+
+This is general software engineering, not an AI product. It sits beside the AI Agent line of work to show physics, tooling, and tests.
+
 一个开源的像素风角色物理自动对战模拟器。角色视觉上是 16x16 像素小人，底层使用圆形刚体碰撞，在封闭竞技场中自动移动、冲撞、反弹、释放技能。项目用于短视频连载和评论区共创角色。
 
 ## 当前项目定位
@@ -32,61 +38,33 @@
 
 ## 角色展示 (Character Showcase)
 
-> **提示**: 以下展示的动作序列图 (Sprite Sheet) 可以通过运行 `npm run export:readme-sheets` 自动生成，或者通过 Pixel Sprite Previewer 的 **Export Animation Sheet** 功能手动导出。导出的 PNG 会自动保存在 `assets/readme/` 目录下。
+仓库里目前没有提交生成好的 sprite sheet PNG（`assets/readme/` 只有 `.keep`）。动作序列图需要本地生成后再放入 README，不要把空路径当成已有截图。
+
+生成方式：运行 `npm run export:readme-sheets`，或在 Pixel Sprite Previewer 里用 **Export Animation Sheet**。导出的 PNG 会写到 `assets/readme/`。
 
 ### Shield Cat (盾盾猫)
 
-**定位**：重装防御型，高护盾，慢速。
-**视觉特征**：稳重的猫耳和左侧的重型盾牌。
-**动作特点**：移动时沉稳，受击时盾牌会有明显的闪烁反馈。
-
-- **Move**: 
-  ![Shield Cat Move](./assets/readme/shield_cat_move_sheet.png)
+重装防御型，高护盾，慢速。稳重的猫耳和左侧重型盾牌。
 
 ### Rush Dog (冲刺狗)
 
-**定位**：高速冲撞型，高冲量 Dash。
-**视觉特征**：前倾的冲刺姿态和亮色的护目镜。
-**动作特点**：移动时有强烈的向前倾斜感，冲刺（Dash）前会有短暂的蓄力（Charge）动作。
-
-- **Move**: 
-  ![Rush Dog Move](./assets/readme/rush_dog_move_sheet.png)
+高速冲撞型，高冲量 Dash。前倾姿态和护目镜；Dash 前有短暂蓄力。
 
 ### Fire Wizard (火焰法师)
 
-**定位**：远程风筝型，低血量，发射火球。
-**视觉特征**：标志性的尖顶法师帽和带有发光宝石的法杖。
-**动作特点**：移动时法杖会随之摆动，施法（Skill）时法杖宝石会高亮闪烁。
-
-- **Move**: 
-  ![Fire Wizard Move](./assets/readme/fire_wizard_move_sheet.png)
+远程风筝型，低血量，发射火球。尖顶帽与法杖；施法时宝石高亮。
 
 ### Heal Bot (回血机器人)
 
-**定位**：消耗防守型，自动回血。
-**视觉特征**：方正的机械轮廓、分明的关节和胸前的绿色十字标志。
-**动作特点**：移动时有机械的上下起伏感，回血时身上会冒出绿色十字粒子特效。
-
-- **Move**: 
-  ![Heal Bot Move](./assets/readme/heal_bot_move_sheet.png)
+消耗防守型，自动回血。机械轮廓与胸前绿色十字。
 
 ### Split Slime (分裂史莱姆)
 
-**定位**：召唤消耗型，受击分裂小史莱姆。
-**视觉特征**：圆润Q弹的果冻状半透明身体，内部有高光。
-**动作特点**：移动时像果冻一样挤压拉伸（Squash and Stretch），受击时会剧烈形变并分裂。
-
-- **Move**: 
-  ![Split Slime Move](./assets/readme/split_slime_move_sheet.png)
+召唤消耗型，受击分裂。果冻形变（squash and stretch）。
 
 ### Mirror Knight (反伤骑士)
 
-**定位**：防守反击型，概率反弹伤害。
-**视觉特征**：挺拔的身躯和带有高光渐变的镜面盾牌。
-**动作特点**：移动时步伐坚定，触发反弹（Reflect）时盾牌会发出强烈的闪光特效。
-
-- **Move**: 
-  ![Mirror Knight Move](./assets/readme/mirror_knight_move_sheet.png)
+防守反击型，概率反弹伤害。镜面盾牌在 Reflect 时闪光。
 
 ## 本地运行方式
 
