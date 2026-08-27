@@ -1,27 +1,186 @@
-<p>
-  <a href="#english"><kbd>&nbsp;English&nbsp;</kbd></a>
-  &nbsp;
-  <a href="#zhong-wen"><kbd>&nbsp;中文&nbsp;</kbd></a>
-</p>
+# Comment Battle Arena
 
-<a id="english"></a>
+> **Can an auto-battle toy become a reproducible content engine instead of a one-off demo?**
+
+Comment Battle Arena is a configurable pixel auto-battle simulator built with TypeScript and Canvas. Characters are 16×16 pixel sprites visually, but behave as circular rigid bodies underneath: they move, collide, bounce, deal impact damage, and trigger character-specific skills.
+
+The interesting part for me was not just making two characters fight. It was building enough structure around the fight that a match can be **reproduced, tuned, saved as an episode, and used as a creator workflow**.
+
+`TypeScript` · `Canvas` · `deterministic physics` · `seeded randomness` · `Vitest` · `creator tooling`
+
+## What I built
+
+### A reproducible battle engine
+
+- Automatic `BattleEngine` game loop.
+- Circular rigid-body collision and wall response.
+- Impulse-based impact damage using relative velocity.
+- Pair-based collision damage cooldown to avoid continuous squeeze damage.
+- Constant-speed correction so matches do not decay into motionless states.
+- Seeded LCG randomness for reproducible matches.
+- Configurable episodes as saved/published match presets.
+
+### Characters that are configuration, not hardcoded scenes
+
+The current MVP includes six default characters with different physical properties and skills:
+
+- **Shield Cat** — slow, defensive, high shield.
+- **Rush Dog** — high-speed dash / collision pressure.
+- **Fire Wizard** — ranged fireball playstyle.
+- **Heal Bot** — sustain through healing.
+- **Split Slime** — split / summon-style attrition.
+- **Mirror Knight** — defensive reflection.
+
+Visual sprites use a 16×16 numeric matrix plus palette. Physics and visuals are intentionally separate: the sprite controls appearance; `physics.radius` and other configuration control collision behavior.
+
+### A creator workflow around the engine
+
+I did not want adding a character to mean manually editing several unrelated files every time, so the project grew its own tooling:
+
+- **Custom Match Setup** — choose left/right characters and an optional seed, then run a temporary match.
+- **Pixel Sprite Previewer** — import an image, crop it, remove a background, convert it into a 16×16 draft, edit the matrix/palette, and preview animation states.
+- **CharacterConfig generator** — create a draft character configuration from presets.
+- **Temporary registration + test** — register a draft character in browser memory and immediately test it in Custom Match.
+- **Episode Draft generator** — turn an interesting test match into copyable episode configuration.
+- **Animation Sheet export** — generate sprite sheets for documentation/content use.
+
+That tooling is the main reason this project is more useful to me than a single battle demo: the engine and the content-production loop can evolve separately.
+
+## Architecture
+
+```text
+src/
+├─ core/         BattleEngine, physics, math, shared types
+├─ data/         characters, pixel sprites, episode presets
+├─ entities/     Character / Projectile / Effect entities
+├─ rendering/    Canvas renderer and pixel animation system
+├─ skills/       event-driven character skills
+├─ app.ts        UI and tooling bindings
+└─ main.ts       application entry
+
+tests/           physics and damage tests
+docs/            architecture notes and ADRs
+```
+
+Core responsibilities:
+
+- **BattleEngine** — game loop, entity updates, physics iterations, collision handling, match result.
+- **Physics / Collision** — overlap correction, impulse response, wall collisions, impact damage.
+- **CharacterEntity** — health, velocity, state and movement correction.
+- **Skill System** — event-driven hooks such as `onTick`, `onAttack`, and `onDamageTaken`.
+- **PixelCharacterRenderer** — renders matrix + palette sprites with pixel alignment.
+- **Transform Keyframes** — interpolates transform extrema and samples them at a low stepped frame rate for retro-style animation.
+- **Episode System** — stores reproducible match presets for published/saved battles.
+
+## Run it
+
+```bash
+npm install
+npm run dev
+
+npm run build
+npx vitest run
+```
+
+Current tests live in `tests/`, including physics and damage behavior. There is no CI yet.
+
+## Reproducibility matters
+
+An auto-battle system becomes difficult to debug if every run is different. Custom matches can therefore use an explicit integer seed. Interesting results can be copied into an Episode draft and replayed later.
+
+The goal is not perfectly deterministic simulation across every possible runtime forever; the practical goal is to make authored/tested match scenarios reproducible enough to inspect and tune.
+
+## Current limitations
+
+- There is no hosted public demo yet.
+- Generated README sprite-sheet PNGs are not committed yet; `assets/readme/` currently only contains `.keep`.
+- Community-submitted characters are a product/content idea, not an implemented submission system.
+- Skill/state-machine test coverage is incomplete.
+- There is no CI.
+
+Generate animation sheets locally with:
+
+```bash
+npm run export:readme-sheets
+```
+
+## Next
+
+- Improve the six default character sprites and animation presentation.
+- Expand charge / skill-state integration beyond the current uses.
+- Add stronger skill and state-machine tests.
+- Add a clearer Previewer / character-creation walkthrough.
+- Add real screenshots or animation sheets to this README.
+
+---
+
+<details>
+<summary><strong>中文：完整玩法与角色制作说明</strong></summary>
+
+<br>
 
 # Comment Battle Arena
 
-Configurable pixel battle simulator with deterministic physics, skills, and creator tooling.
+> **一个自动对战点子，能不能变成可复现、可配置、可以持续生产角色与对战内容的系统？**
 
-TypeScript · Canvas · seeded LCG randomness · Vitest · character/episode tooling
+这是一个像素风角色物理自动对战模拟器。角色视觉上是 16×16 像素小人，底层使用圆形刚体碰撞，在封闭竞技场中自动移动、冲撞、反弹、释放技能。
 
-This is general software engineering, not an AI product. It sits beside the AI Agent line of work to show physics, tooling, and tests.
+项目的重点不只是“两个角色自动打一架”，而是把它逐渐做成一套完整的内容生产链：角色可以配置、比赛可以用 Seed 复现、Episode 可以保存、角色可以通过 Previewer 制作并快速测试。
 
-## What it is
+## 当前项目定位
 
-- Not a player-controlled fighting game
-- Not a pinball game — characters themselves are circular rigid bodies
-- Configured episodes play out automatically
-- Community-submitted characters are a future idea, not implemented
+- **不是传统手操小游戏**：玩家不直接控制角色移动或攻击。
+- **不是弹球游戏**：场上默认没有独立小球，两个像素角色本身拥有圆形刚体物理特性。
+- **配置化对战**：比赛可以按 Episode 配置生成并复现。
+- **社区共创是下一阶段想法**：评论区投稿角色目前还不是完整线上功能。
 
-## Run locally
+## 当前已实现功能（MVP）
+
+- Vite + TypeScript + Canvas 本地项目
+- 自动对战 `BattleEngine`
+- 圆形刚体物理系统：角色碰撞、墙体碰撞、冲量响应
+- 基于相对速度的撞击伤害，无持续挤压伤害
+- pair-based collision damage cooldown
+- Constant Speed Correction 动量维持
+- 6 个默认角色及不同物理特性 / 技能
+- Episode 配置系统，作为 Saved / Published Match Preset
+- 16×16 matrix + palette 的纯代码像素角色
+- Transform Keyframes 动画：Linear Interpolation + Stepped Time Sampling
+- pixel projectile / effect：spark、heal、reflect 等
+- High-DPI Canvas 文本渲染
+- Debug collider 可视化
+- 战斗结果统计与 Copy Episode Result
+- **Custom Match Setup**：自由选择左右角色、自定义 Seed
+- **Pixel Sprite Previewer**：矩阵解析、动画预览、Animation Sheet 导出
+- **CharacterConfig & Episode Draft Generator**
+
+## 六个默认角色
+
+### Shield Cat / 盾盾猫
+
+重装防御型，高护盾、慢速，猫耳与重盾视觉。
+
+### Rush Dog / 冲刺狗
+
+高速冲撞型，高冲量 Dash，Dash 前有短暂蓄力。
+
+### Fire Wizard / 火焰法师
+
+远程风筝型，低血量，使用火球。
+
+### Heal Bot / 回血机器人
+
+消耗防守型，可以自动回血。
+
+### Split Slime / 分裂史莱姆
+
+召唤 / 消耗型，受击分裂，带 squash-and-stretch 视觉。
+
+### Mirror Knight / 反伤骑士
+
+防守反击型，概率反弹伤害。
+
+## 本地运行
 
 ```bash
 npm install
@@ -30,203 +189,115 @@ npm run build
 npx vitest run
 ```
 
-Tests live in `tests/` (`physics.test.ts`, `physics2.test.ts`, `damage.test.ts`). There is no CI.
+测试位于 `tests/`，目前覆盖物理与伤害等核心行为。暂时没有 CI。
 
-Animation sheets for the README are generated with `npm run export:readme-sheets` and are **not** committed yet (`assets/readme/` only has `.keep`).
-
-Full character-creation workflow, matrix spec, and episode tooling: jump to [中文](#zhong-wen).
-
----
-
-<a id="zhong-wen"></a>
-
-# 中文
-
-<p>
-  <a href="#english"><kbd>&nbsp;English&nbsp;</kbd></a>
-  &nbsp;
-  <a href="#zhong-wen"><kbd>&nbsp;中文&nbsp;</kbd></a>
-</p>
-
-# Comment Battle Arena
-
-一个开源的像素风角色物理自动对战模拟器。角色视觉上是 16x16 像素小人，底层使用圆形刚体碰撞，在封闭竞技场中自动移动、冲撞、反弹、释放技能。项目用于短视频连载和评论区共创角色。
-
-## 当前项目定位
-
-- **这不是传统手操小游戏**：玩家不直接控制角色移动或攻击。
-- **这不是弹球游戏**：场上默认没有独立小球。核心是两个像素角色本身拥有圆形刚体物理特性。
-- **配置化对战**：视频内容可以按 Episode 配置生成，自动演算战斗过程。
-- **社区共创**：未来角色可以来自评论区投稿。
-
-## 当前已实现功能 (MVP)
-
-- Vite + TypeScript + Canvas 本地项目
-- 自动对战 BattleEngine
-- 圆形刚体物理系统（角色碰撞、墙体碰撞、冲量响应）
-- 撞击伤害判定（基于相对速度，无持续挤压伤害）
-- pair-based collision damage cooldown
-- 动量维持机制（Constant Speed Correction）
-- 6 个默认角色（具有不同物理特性和技能）
-- Episode 配置系统 (作为 Published / Saved Match Preset)
-- 纯代码像素矩阵角色渲染（16x16 matrix + palette）
-- Transform Keyframes 动画系统（Linear Interpolation + Stepped Time Sampling）
-- 像素风 projectile / effect (spark, heal, reflect)
-- High-DPI (Retina) Canvas 文本渲染支持与 Times New Roman UI 字体
-- Debug collider 可视化
-- 战斗结果统计与复制功能 (Copy Episode Result)
-- **Custom Match Setup** (自由选择左右角色、自定义 Seed 进行临时对战测试)
-- **Pixel Sprite Previewer 开发工具** (支持矩阵解析、动画预览、导出 Animation Sheet)
-- **CharacterConfig & Episode Draft Generator** (辅助快速生成角色配置代码)
-- **矩阵编辑器的 `textarea` 保持等宽字体 (`monospace`) 以确保编辑时矩阵对齐，其他 UI 统一使用 Times New Roman。**
-
-## 角色展示 (Character Showcase)
-
-仓库里目前没有提交生成好的 sprite sheet PNG（`assets/readme/` 只有 `.keep`）。动作序列图需要本地生成后再放入 README，不要把空路径当成已有截图。
-
-生成方式：运行 `npm run export:readme-sheets`，或在 Pixel Sprite Previewer 里用 **Export Animation Sheet**。导出的 PNG 会写到 `assets/readme/`。
-
-### Shield Cat (盾盾猫)
-
-重装防御型，高护盾，慢速。稳重的猫耳和左侧重型盾牌。
-
-### Rush Dog (冲刺狗)
-
-高速冲撞型，高冲量 Dash。前倾姿态和护目镜；Dash 前有短暂蓄力。
-
-### Fire Wizard (火焰法师)
-
-远程风筝型，低血量，发射火球。尖顶帽与法杖；施法时宝石高亮。
-
-### Heal Bot (回血机器人)
-
-消耗防守型，自动回血。机械轮廓与胸前绿色十字。
-
-### Split Slime (分裂史莱姆)
-
-召唤消耗型，受击分裂。果冻形变（squash and stretch）。
-
-### Mirror Knight (反伤骑士)
-
-防守反击型，概率反弹伤害。镜面盾牌在 Reflect 时闪光。
-
-## 本地运行方式
-
-1. 安装依赖：
-  ```bash
-   npm install
-  ```
-2. 启动开发服务器：
-  ```bash
-   npm run dev
-  ```
-3. 构建与测试：
-  ```bash
-   npm run build
-   npx vitest run
-  ```
-
-## 项目结构树
+## 项目结构
 
 ```text
 CommentBattleArena/
 ├─ src/
 │  ├─ core/         # 核心引擎、物理、数学、类型定义
 │  ├─ data/         # 角色配置、像素矩阵数据、对战剧本
-│  ├─ entities/     # 游戏实体基类及派生类 (Character, Projectile, Effect 等)
+│  ├─ entities/     # Character / Projectile / Effect 等实体
 │  ├─ rendering/    # 渲染器、像素动画系统
-│  ├─ skills/       # 技能具体实现及注册表
+│  ├─ skills/       # 技能实现与注册表
 │  ├─ app.ts        # 应用入口、UI 绑定
 │  └─ main.ts       # 启动文件
-├─ tests/           # 单元测试 (物理、伤害等)
-├─ docs/            # 架构文档、ADR 记录
+├─ tests/           # 单元测试
+├─ docs/            # 架构文档、ADR
 ├─ README.md
 ├─ CONTEXT.md
 ├─ CHANGELOG.md
 └─ package.json
 ```
 
-## 核心系统说明
+## 核心系统
 
-- **BattleEngine**：负责管理游戏主循环、实体更新、物理迭代、碰撞检测和胜负判定。
-- **Physics / Collision**：负责处理圆形刚体碰撞、位置修正（防重叠）、冲量计算和撞击伤害判定。
-- **CharacterEntity**：代表场上的战斗角色，维护生命值、速度、状态机，并执行速度修正逻辑。
-- **Skill System**：事件驱动的技能系统，角色在特定时机（如 `onTick`, `onAttack`, `onDamageTaken`）触发注册的技能逻辑。
-- **PixelCharacterRenderer**：负责将 16x16 的数字矩阵结合调色板渲染到 Canvas 上，并处理像素对齐。
-- **Transform Keyframes**：动画系统，通过对极值点进行线性插值并按固定低帧率（如 8fps）阶梯化采样，实现复古像素动画。
-- **Episode System**：作为 Published / Saved Match Preset，定义每期对战的双方角色、等级、队伍配置，用于正式发布和复现。
+- **BattleEngine**：游戏主循环、实体更新、物理迭代、碰撞与胜负判定。
+- **Physics / Collision**：圆形刚体碰撞、位置修正、冲量和撞击伤害。
+- **CharacterEntity**：生命、速度、状态机与速度修正。
+- **Skill System**：通过 `onTick`、`onAttack`、`onDamageTaken` 等事件触发技能。
+- **PixelCharacterRenderer**：把 16×16 数字矩阵和调色板渲染到 Canvas。
+- **Transform Keyframes**：线性插值极值点，再以低帧率阶梯采样得到复古动画。
+- **Episode System**：保存双方角色、等级、队伍和 Seed 等正式比赛配置。
 
-## 如何自由选择左右角色并启动自定义对战
+## Custom Match：自由测试一场对战
 
-在页面控制区下方有一个 **Custom Match Setup** 面板：
+页面控制区有 **Custom Match Setup**：
 
-1. 在 **Left Character** 和 **Right Character** 下拉框中选择你想测试的角色（支持同角色内战）。
-2. （可选）输入一个整数作为 **Seed**，如果不填则自动生成随机 Seed。
-3. 点击 **Start Custom Match** 按钮即可立即启动这场临时对战。
-4. 如果觉得这场对战很有趣，可以点击 **Copy Episode Draft**，将生成的配置代码粘贴到 `src/data/episodes.ts` 中永久保存。
-5. 点击顶部的 **Prev Episode** 或 **Next Episode** 按钮，可以随时切回代码中固定的 Episode 剧本流程。
+1. 在 **Left Character** / **Right Character** 中选择双方，支持同角色内战。
+2. 可选输入一个整数 Seed；不填时自动生成。
+3. 点击 **Start Custom Match** 启动临时比赛。
+4. 如果比赛值得保留，点击 **Copy Episode Draft**，复制配置到 `src/data/episodes.ts`。
+5. 使用 **Prev Episode** / **Next Episode** 可以切回代码中保存的 Episode。
 
-## 角色制作完整工作流 (Character Creation Workflow)
+## Character Creation Workflow
 
-我们提供了一套完整的工具链，帮助你从零开始或基于参考图快速制作新角色，并立即在游戏中进行测试。推荐的制作顺序如下：
+项目包含一套从参考图到可测试角色的工具链：
 
-1. **打开预览器 (Open Previewer)**：点击页面底部的 **Open Pixel Sprite Previewer** 按钮。
-2. **导入参考图 (Import Image)**：在左侧 **Import Image to Matrix v2** 区域，选择一张本地图片（如 PNG/JPG）。
-   - **裁剪主体 (Crop)**：调整 Crop X/Y/Size，确保只框选角色主体。
-   - **移除背景 (Remove Background)**：勾选 Remove Background，默认会自动提取左上角颜色作为背景色并透明化。白底或浅色背景会自动优先转为透明（Treat Near-White as Transparent），避免污染角色调色板。
-   - **生成草稿 (Preview & Apply)**：点击 Preview Result，满意后点击 Apply to Matrix。导入结果只是草稿，不建议直接当最终角色。
-3. **手动清理与调色 (Clean & Color)**：在左侧的文本框中修改 16x16 矩阵，清理杂乱像素；在右下角的 Palette Editor 中调整 7 色调色板。如果导入结果很脏，通常是因为图太复杂、主体太小、背景没有去掉或 16x16 尺寸无法保留细节。
-4. **预览动画 (Preview Animation)**：在右上角的下拉框中切换不同动画状态（如 `move`, `attack`, `dash`），实时查看 Transform Keyframes 驱动的动态效果。
-5. **导出定义 (Copy Definition)**：调整满意后，点击 **Copy Definition** 按钮。打开 `src/data/pixelSprites.ts`，将复制的代码粘贴进去，并注册到 `sprites` 对象中。
-6. **生成配置 (Generate Config)**：在 Previewer 中间的生成器面板中，填写角色名称、设定，选择战斗风格模板（如 `aggressive_heavy`）和技能预设。
-7. **快速测试 (Register & Test)**：不需要手动写代码！直接点击 **Register Temp Character**，然后点击 **Test In Custom Match**。这会将你的草稿注册到浏览器的内存中，并自动在 Custom Match Setup 面板里选中它。你可以立即开始一场对战测试。
-8. **导出正式代码 (Export Code)**：如果测试满意，点击 **Copy Definition** 和 **Copy CharacterConfig Draft**，将代码分别粘贴到 `src/data/pixelSprites.ts` 和 `src/data/characters.ts` 中永久保存。
-9. **导出展示图 (Export README PNG)**：在 Previewer 中使用 **Export Animation Sheet** 导出动作序列图，或通过 `npm run export:readme-sheets` 批量导出，放到 `assets/readme/` 下用于展示。
+1. **Open Previewer**：打开 Pixel Sprite Previewer。
+2. **Import Image to Matrix v2**：选择 PNG/JPG 参考图。
+   - 调整 Crop X/Y/Size，只保留主体。
+   - `Remove Background` 可提取背景色；浅色背景会优先按透明处理。
+   - `Preview Result` 后再 `Apply to Matrix`。自动转换只作为草稿。
+3. **Clean & Color**：手动清理 16×16 矩阵，并用 Palette Editor 调整 7 色调色板。
+4. **Preview Animation**：切换 `move`、`attack`、`dash` 等状态查看动画。
+5. **Copy Definition**：复制 Sprite Definition，写入 `src/data/pixelSprites.ts` 并注册。
+6. **Generate Config**：填写角色名称、设定、战斗风格模板和技能预设，生成角色配置草稿。
+7. **Register Temp Character** + **Test In Custom Match**：先只注册到浏览器内存，不写正式代码，直接进行对战验证。
+8. 测试满意后复制 Sprite Definition 与 CharacterConfig 到正式数据文件。
+9. 使用 **Export Animation Sheet** 或 `npm run export:readme-sheets` 生成展示图。
 
-### 关于矩阵解析器 (Matrix Parser)
+## Matrix Parser
 
-Previewer 左侧的输入框支持极其宽松的解析格式：
+Previewer 输入框支持多种格式：
 
-- 优先提取 `matrix: [...]` 字段。
-- 其次提取标准的 `[[...], [...]]` 二维数组。
-- 最后会自动提取文本中的前 256 个有效数字 (0-7)。
-- **注意**：如果粘贴的是完整的 Sprite Definition TypeScript 代码，解析器会自动忽略十六进制颜色值以防污染矩阵。但为了最佳体验，建议只粘贴矩阵部分，或直接使用 Load Existing Sprite。
+- 优先提取 `matrix: [...]`
+- 其次提取标准 `[[...], [...]]` 二维数组
+- 最后尝试提取前 256 个有效数字（0–7）
+- 粘贴完整 TypeScript Sprite Definition 时会尝试忽略十六进制颜色值，避免污染矩阵
+
+为了稳定，仍建议直接粘贴 matrix 部分或使用 Load Existing Sprite。
 
 ## 像素矩阵规范
 
-- **默认尺寸**：16x16
-- **数字含义**：
-  - 0 = transparent (透明)
-  - 1 = outline (描边)
-  - 2 = shadow (阴影)
-  - 3 = main (主色)
-  - 4 = highlight (高光)
-  - 5 = accent (点缀色)
-  - 6 = weapon (武器/配件)
-  - 7 = effect (特效)
+默认尺寸：**16×16**。
 
-**注意**：视觉矩阵和圆形 collider 是完全独立的。矩阵只决定角色长什么样，物理碰撞由 `physics.radius` 等参数决定。
+```text
+0 = transparent
+1 = outline
+2 = shadow
+3 = main
+4 = highlight
+5 = accent
+6 = weapon / accessory
+7 = effect
+```
 
-## 评论区角色投稿格式
+视觉矩阵和 collider 完全独立。Matrix 决定长什么样，`physics.radius` 等配置决定碰撞行为。
 
-观众可以在评论区按以下格式投稿新角色：
+## 评论区角色投稿格式（产品想法）
 
 ```text
 角色名：
 一句话设定：
 外观特征：
-球体/碰撞特性：(例如：极重且慢 / 极轻且弹)
-战斗风格：(近战冲刺/远程风筝/防守反击/召唤等)
+球体/碰撞特性：
+战斗风格：
 技能：
 弱点：
 想挑战谁：
 是否原创：
 ```
 
-## 当前 TODO / 下一阶段计划
+这目前是未来社区共创流程的输入格式，不代表已经实现线上投稿系统。
 
-- **更多技能接入 charge / skill 状态**：基础状态字段已接入，Rush Dog 已使用 charge，更多技能待进一步接入。
-- **角色美术优化**：当前阶段重点从功能开发转向角色美术优化，6 个默认角色的像素外观正在打磨，并在 README 中新增了角色展示区。暂不推进 Publishing Helper。
-- **更完整的 Previewer 使用示例和角色制作教程**。
-- **技能和状态机测试覆盖**。
+## 当前下一阶段
 
+- 更多技能接入 charge / skill 状态；基础字段已有，Rush Dog 已使用 charge。
+- 优化六个默认角色的像素美术与展示效果。
+- 增加 Previewer 使用示例和角色制作教程。
+- 增加技能与状态机测试覆盖。
+- 生成并提交真实 Animation Sheet / Screenshot 到 README。
+
+</details>
