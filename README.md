@@ -1,5 +1,12 @@
 # Comment Battle Arena
 
+![Language: TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Renderer: Canvas](https://img.shields.io/badge/Renderer-Canvas-E34F26?style=flat-square&logo=html5&logoColor=white)
+![Build: Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Tests: Vitest](https://img.shields.io/badge/Tests-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)
+![Physics: Deterministic](https://img.shields.io/badge/Physics-Deterministic-5C6BC0?style=flat-square)
+![Content: Creator Tooling](https://img.shields.io/badge/Content-Creator%20Tooling-D97706?style=flat-square)
+
 > **Can an auto-battle toy become a reproducible content engine instead of a one-off demo?**
 
 Comment Battle Arena is a configurable pixel auto-battle simulator built with TypeScript and Canvas. Characters are 16×16 pixel sprites visually, but behave as circular rigid bodies underneath: they move, collide, bounce, deal impact damage, and trigger character-specific skills.
